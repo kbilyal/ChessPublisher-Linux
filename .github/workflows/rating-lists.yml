@@ -6,17 +6,21 @@ on:
     paths:
       - 'linux/rating_lists/**'
       - 'linux/rating_lists_integration.py'
+      - 'linux/rating_lists_ui_integration.py'
       - 'linux/chess_publisher_linux_entry.py'
       - 'linux/build_info.py'
       - 'tests/test_rating_lists.py'
+      - 'tests/test_rating_lists_ui.py'
       - '.github/workflows/rating-lists.yml'
   pull_request:
     paths:
       - 'linux/rating_lists/**'
       - 'linux/rating_lists_integration.py'
+      - 'linux/rating_lists_ui_integration.py'
       - 'linux/chess_publisher_linux_entry.py'
       - 'linux/build_info.py'
       - 'tests/test_rating_lists.py'
+      - 'tests/test_rating_lists_ui.py'
       - '.github/workflows/rating-lists.yml'
 
 jobs:
@@ -33,6 +37,9 @@ jobs:
             linux/rating_lists/__init__.py \
             linux/rating_lists/parser.py \
             linux/rating_lists/store.py \
-            linux/rating_lists_integration.py
+            linux/rating_lists_integration.py \
+            linux/rating_lists_ui_integration.py
       - name: Run deterministic rating-list tests
         run: python tests/test_rating_lists.py
+      - name: Run rating-list UI contract
+        run: python tests/test_rating_lists_ui.py

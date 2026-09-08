@@ -14,6 +14,7 @@ from fide_cache_integration import apply as apply_fide_cache
 from rating_lists_integration import apply as apply_rating_lists
 from fide_readiness_integration import apply as apply_fide_readiness
 from fide_integration import apply as apply_fide
+from rating_lists_ui_integration import apply as apply_rating_lists_ui
 from chess_results_integration import apply as apply_chess_results
 from dgt_integration import apply as apply_dgt
 from telegram_integration import apply as apply_telegram
@@ -33,6 +34,7 @@ apply_fide_cache()
 apply_rating_lists()
 apply_fide_readiness()
 apply_fide()
+apply_rating_lists_ui()
 apply_chess_results()
 apply_dgt()
 apply_telegram()
