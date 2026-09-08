@@ -133,6 +133,40 @@ class RatingListsTests(unittest.TestCase):
                 manager.activate_from_files(bad)
             self.assertEqual(manager.status().generation, generation)
 
+    def test_tournament_snapshot_is_not_mutated_by_database_update(self) -> None:
+        """A tournament keeps copied player values until an explicit review/apply."""
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            manager = IntegratedRatingLists(root / "db")
+
+            first: dict[str, Path] = {}
+            for index, kind in enumerate(("std", "rapid", "blitz")):
+                path = root / f"first-{kind}.txt"
+                write_list(path, delta=index * 20)
+                first[kind] = path
+            manager.activate_from_files(first)
+
+            reference = manager.lookup(["10000003"])["players"][0]
+            tournament_player = {
+                "fideId": reference["fideId"],
+                "name": reference["name"],
+                "rating": reference["std"],
+                "fideK": reference["stdK"],
+                "fed": reference["fed"],
+            }
+            frozen = dict(tournament_player)
+
+            second: dict[str, Path] = {}
+            for index, kind in enumerate(("std", "rapid", "blitz")):
+                path = root / f"second-{kind}.txt"
+                write_list(path, delta=100 + index * 20)
+                second[kind] = path
+            manager.activate_from_files(second)
+
+            newer = manager.lookup(["10000003"])["players"][0]
+            self.assertNotEqual(newer["std"], frozen["rating"])
+            self.assertEqual(tournament_player, frozen)
+
 
 if __name__ == "__main__":
     unittest.main()
