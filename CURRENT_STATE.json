@@ -1,17 +1,39 @@
 {
   "project": "Chess-Publisher Linux",
   "repository": "kbilyal/ChessPublisher-Linux",
-  "sourceProject": "kbilyal/ChessPublisher",
-  "sourceBranchBeforeSplit": "linux-ubuntu-port",
-  "sourceCommitBeforeSplit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
-  "baselineVersion": "v1.06.00-beta.34-linuxdev21",
+  "authoritativeBranch": "main",
   "version": "v1.06.00-beta.34-linuxdev22",
-  "status": "DEVELOPMENT - RATING LIST INTEGRATION IN PROGRESS",
-  "baselineAcceptanceRun": {
-    "workflow": "Linux Ubuntu Acceptance",
-    "runNumber": 242,
-    "runId": 34251523583,
+  "developmentHead": "e55db834915a8850640bf82a9b20c3c8e3a51103",
+  "status": "IN DEVELOPMENT - Rating Lists core/UI/continuity gates PASS; full protected Linux acceptance pending",
+  "baseline": {
+    "sourceProject": "kbilyal/ChessPublisher",
+    "sourceBranchBeforeSplit": "linux-ubuntu-port",
+    "sourceCommitBeforeSplit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
+    "version": "v1.06.00-beta.34-linuxdev21",
+    "acceptanceWorkflow": "Linux Ubuntu Acceptance",
+    "acceptanceRunNumber": 242,
+    "acceptanceRunId": 34251523583,
     "conclusion": "success"
+  },
+  "ratingLists": {
+    "architecture": "installation-local integrated Standard/Rapid/Blitz reference database; separate from tournament state",
+    "database": "generation-based SQLite",
+    "update": "three-list atomic activation with previous-generation rollback safety",
+    "search": "exact FIDE ID + Unicode NFKD case/accent/punctuation-normalized name search",
+    "report": "persistent human-readable last successful update report",
+    "ui": "Integrated Rating Lists cards + Update Rating Lists + View Last Update Report + Review Player Updates",
+    "browserStrategy": "Linux full updates are server-authoritative and do not sequentially rebuild the giant browser FIDE map; search uses LocalEngine first",
+    "tournamentPlayersChangedByUpdate": false,
+    "ci": [
+      {"runNumber": 1, "runId": 34262834916, "conclusion": "success", "scope": "parser/store atomicity/search"},
+      {"runNumber": 2, "runId": 34264563985, "conclusion": "success", "scope": "UI/status/report/server-search contracts"},
+      {"runNumber": 3, "runId": 34264883467, "conclusion": "success", "scope": "non-destructive materializer continuity"}
+    ]
+  },
+  "continuity": {
+    "materializer": "scripts/bootstrap_dev21_from_upstream.py",
+    "rule": "materialize immutable dev21 baseline into a separate output directory, verify protected source, then overlay current dedicated-repo Linux/tests deltas",
+    "destructiveRepoOverwriteForbidden": true
   },
   "protectedSourceSha256": {
     "ChessPublisher.html": "f51355b1a449870be6ed69d1bb941c19a9d8d2bdf3c8f91da845b4bc1275f310",
@@ -31,41 +53,5 @@
     "Tie-Break core/checker",
     "Chess-Results protocol/core"
   ],
-  "completed": [
-    "Dedicated Linux repository initialized",
-    "AI handoff and deterministic dev21 recovery bootstrap",
-    "Linux native runtime baseline",
-    "Desktop-Web directional Cloud sync",
-    "Fluidity v2 single workspace",
-    "Fixed Pairings Result Desk",
-    "Always-visible Chess-Results tab",
-    "TRF16/TRF26 acceptance baseline",
-    "Gacrux/BBP/Tie-Break acceptance baseline",
-    "Rating list fixed-width parser",
-    "Case/accent/punctuation normalized search keys",
-    "Exact FIDE-ID lookup",
-    "Three-list generation store",
-    "Atomic active-generation pointer",
-    "Rollback safety when any list is incomplete",
-    "Human-readable update report",
-    "Dedicated rating-list CI workflow"
-  ],
-  "currentTask": "Finish Linux dev22 integration with LocalEngine/UI, port full regression workflow to this repository, then produce a dev22 test .deb only after all protected gates pass.",
-  "ratingLists": {
-    "providers": ["FIDE Standard", "FIDE Rapid", "FIDE Blitz"],
-    "databaseRole": "installation-local reference data, separate from tournament state",
-    "tournamentPlayersAutoChanged": false,
-    "atomicModel": "build complete generation -> validate -> SQLite quick_check -> atomic pointer swap",
-    "realSeedBenchmark": {
-      "inputRows": {
-        "standard": 562890,
-        "rapid": 467833,
-        "blitz": 310315
-      },
-      "uniquePlayers": 778954,
-      "buildSecondsObserved": 22.58,
-      "normalizedNameSearchSecondsObserved": 0.1142,
-      "exactFideIdSearchSecondsObserved": 0.0006
-    }
-  }
+  "next": "Materialize the complete dev22 runtime from the exact dev21 baseline + current overlay, then run the full protected Ubuntu/Chromium/FIDE/Chess-Results/TRF/Gacrux acceptance before producing a dev22 .deb test candidate."
 }
