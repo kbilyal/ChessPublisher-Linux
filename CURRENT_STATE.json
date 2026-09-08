@@ -4,9 +4,10 @@
   "sourceProject": "kbilyal/ChessPublisher",
   "sourceBranchBeforeSplit": "linux-ubuntu-port",
   "sourceCommitBeforeSplit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
-  "version": "v1.06.00-beta.34-linuxdev21",
-  "status": "TEST CANDIDATE - FULL LINUX ACCEPTANCE PASS",
-  "acceptanceRun": {
+  "baselineVersion": "v1.06.00-beta.34-linuxdev21",
+  "version": "v1.06.00-beta.34-linuxdev22",
+  "status": "DEVELOPMENT - RATING LIST INTEGRATION IN PROGRESS",
+  "baselineAcceptanceRun": {
     "workflow": "Linux Ubuntu Acceptance",
     "runNumber": 242,
     "runId": 34251523583,
@@ -31,15 +32,40 @@
     "Chess-Results protocol/core"
   ],
   "completed": [
-    "Linux native runtime",
-    "Ubuntu 24.04/26.04 packaging",
+    "Dedicated Linux repository initialized",
+    "AI handoff and deterministic dev21 recovery bootstrap",
+    "Linux native runtime baseline",
     "Desktop-Web directional Cloud sync",
     "Fluidity v2 single workspace",
     "Fixed Pairings Result Desk",
     "Always-visible Chess-Results tab",
-    "Fast clean tab navigation",
-    "TRF16/TRF26 acceptance",
-    "Gacrux/BBP/Tie-Break acceptance"
+    "TRF16/TRF26 acceptance baseline",
+    "Gacrux/BBP/Tie-Break acceptance baseline",
+    "Rating list fixed-width parser",
+    "Case/accent/punctuation normalized search keys",
+    "Exact FIDE-ID lookup",
+    "Three-list generation store",
+    "Atomic active-generation pointer",
+    "Rollback safety when any list is incomplete",
+    "Human-readable update report",
+    "Dedicated rating-list CI workflow"
   ],
-  "next": "linuxdev22 Integrated Rating Lists: Standard/Rapid/Blitz local reference DB, exact FIDE-ID lookup, normalized name search, explicit atomic update, rollback safety, metadata and update report."
+  "currentTask": "Finish Linux dev22 integration with LocalEngine/UI, port full regression workflow to this repository, then produce a dev22 test .deb only after all protected gates pass.",
+  "ratingLists": {
+    "providers": ["FIDE Standard", "FIDE Rapid", "FIDE Blitz"],
+    "databaseRole": "installation-local reference data, separate from tournament state",
+    "tournamentPlayersAutoChanged": false,
+    "atomicModel": "build complete generation -> validate -> SQLite quick_check -> atomic pointer swap",
+    "realSeedBenchmark": {
+      "inputRows": {
+        "standard": 562890,
+        "rapid": 467833,
+        "blitz": 310315
+      },
+      "uniquePlayers": 778954,
+      "buildSecondsObserved": 22.58,
+      "normalizedNameSearchSecondsObserved": 0.1142,
+      "exactFideIdSearchSecondsObserved": 0.0006
+    }
+  }
 }
