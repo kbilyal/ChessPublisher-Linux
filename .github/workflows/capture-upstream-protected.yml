@@ -13,36 +13,23 @@ jobs:
   capture:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout dedicated repo
-        uses: actions/checkout@v4
       - name: Checkout immutable upstream dev21 source
         uses: actions/checkout@v4
         with:
           repository: kbilyal/ChessPublisher
           ref: 5e0b37708cbef2828ec60d7e6faa247d4ecc904d
           path: upstream
-      - name: Stage protected baseline
+      - name: Stage upstream HTML baseline
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p captured/cloud/client captured/hub/client captured/webview
+          mkdir -p captured
           cp upstream/ChessPublisher.html captured/ChessPublisher.html
-          cp upstream/cloud/client/cloud-workspace-api.js captured/cloud/client/cloud-workspace-api.js
-          cp upstream/hub/client/hub-api-client.js captured/hub/client/hub-api-client.js
-          cp upstream/hub/client/hub-snapshot.js captured/hub/client/hub-snapshot.js
-          cp upstream/webview/CloudWorkspaceAdapter.js captured/webview/CloudWorkspaceAdapter.js
-          cp upstream/webview/HubAdapter.js captured/webview/HubAdapter.js
-          cp upstream/webview/WebViewAdapter.js captured/webview/WebViewAdapter.js
-          sha256sum captured/ChessPublisher.html \
-            captured/cloud/client/cloud-workspace-api.js \
-            captured/hub/client/hub-api-client.js \
-            captured/hub/client/hub-snapshot.js \
-            captured/webview/CloudWorkspaceAdapter.js \
-            captured/webview/HubAdapter.js \
-            captured/webview/WebViewAdapter.js > captured/SHA256SUMS.txt
+          sha256sum captured/ChessPublisher.html > captured/SHA256SUMS.txt
+          wc -c captured/ChessPublisher.html
       - name: Upload captured baseline
         uses: actions/upload-artifact@v4
         with:
-          name: upstream-dev21-protected-baseline
+          name: upstream-dev21-html-baseline
           path: captured
           retention-days: 7
