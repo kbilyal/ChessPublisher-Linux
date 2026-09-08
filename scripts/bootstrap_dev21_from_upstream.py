@@ -4,7 +4,7 @@
 The dedicated repository stores Linux deltas and handoff metadata.  This tool
 reconstructs the exact pre-split dev21 runtime into a separate output folder,
 verifies protected source hashes, then overlays the current repository's Linux
-files/tests.  It never overwrites the repository checkout itself.
+files/tests/scripts.  It never overwrites the repository checkout itself.
 """
 from __future__ import annotations
 
@@ -109,7 +109,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     output = args.output.expanduser().resolve()
-    if output == repo_root.resolve() or repo_root.resolve() in output.parents and output.name == "linux":
+    if output == repo_root.resolve() or (repo_root.resolve() in output.parents and output.name == "linux"):
         raise RuntimeError("Refusing to materialize over the repository source tree")
     if output.exists():
         shutil.rmtree(output)
@@ -135,6 +135,7 @@ def main() -> int:
     # agent materialize the current dev22+ state instead of reverting to dev21.
     copy_tree(repo_root / "linux", output / "linux")
     copy_tree(repo_root / "tests", output / "tests")
+    copy_tree(repo_root / "scripts", output / "scripts")
     if (repo_root / "packaging").is_dir():
         copy_tree(repo_root / "packaging", output / "packaging")
 
@@ -148,7 +149,7 @@ def main() -> int:
         "dedicatedRepository": "kbilyal/ChessPublisher-Linux",
         "version": (repo_root / "VERSION").read_text(encoding="utf-8").strip(),
         "protectedSourceVerified": True,
-        "overlay": ["linux/", "tests/", "packaging/ when present"],
+        "overlay": ["linux/", "tests/", "scripts/", "packaging/ when present"],
     }
     (output / "MATERIALIZED_STATE.json").write_text(
         json.dumps(state, indent=2) + "\n", encoding="utf-8"
