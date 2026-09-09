@@ -9,9 +9,10 @@ import mimetypes, re, urllib.parse
 from pathlib import Path
 from typing import Any
 import chess_publisher_linux as cp
+from build_info import DELIVERY_REVISION
 
 _APPLIED=False
-_STACK = b'''\n<!-- CP beta.85 shared WebView stack; Linux transport only -->
+_STACK = f'''\n<!-- CP beta.85 shared WebView stack; Linux transport only -->
 <script src="/linux/LinuxWebViewShim.js"></script>
 <script src="/source/webview/WebViewAdapter.js"></script>
 <script src="/source/hub/client/hub-snapshot.js"></script>
@@ -20,8 +21,9 @@ _STACK = b'''\n<!-- CP beta.85 shared WebView stack; Linux transport only -->
 <script src="/source/cloud/client/cloud-workspace-api.js"></script>
 <script src="/source/webview/CloudWorkspaceAdapter.js"></script>
 <script src="/source/webview/CloudWorkspaceRedesign.js"></script>
-<script>document.documentElement.dataset.chesspublisherLinuxBuild='1.06.00-beta.85';</script>
-'''
+<meta data-chesspublisher-linux-delivery="{DELIVERY_REVISION}">
+<script>document.documentElement.dataset.chesspublisherLinuxBuild='1.06.00-beta.85';document.documentElement.dataset.chesspublisherLinuxDelivery='{DELIVERY_REVISION}';</script>
+'''.encode('utf-8')
 _BUILD_MARKER_RE=re.compile(rb"<script>\s*document\.documentElement\.dataset\.chesspublisherLinuxBuild='[^']*';\s*</script>")
 _OLD_TAGS=(
  b'<script src="/linux/LinuxWebViewShim.js"></script>',
