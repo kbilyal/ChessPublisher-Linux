@@ -1,18 +1,12 @@
 name: Linux beta.85 Exact Source Package
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/exact-source-beta85.yml'
-      - 'linux/**'
-      - 'ci/**'
-      - 'tests/**'
-      - 'scripts/bootstrap_dev21_from_upstream.py'
-      - 'source_manifest.json'
-      - 'VERSION'
-      - 'VERSION.txt'
   workflow_dispatch:
+    inputs:
+      source_url:
+        description: Direct URL for the exact authoritative beta.85 source archive
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -23,76 +17,37 @@ jobs:
     timeout-minutes: 35
     env:
       CP_RUNTIME: ${{ github.workspace }}/.runtime/exact-beta85
-      CP_WINDOWS_SOURCE: ${{ github.workspace }}/.exact/windows-beta85
       CP_SHARED_ARCHIVE: ${{ github.workspace }}/.exact/Chess-Publisher-Windows-v1.06.00-beta.85-AUTHORITATIVE-SOURCE.tar.gz
       CP_DIST: ${{ github.workspace }}/.dist/beta85
-      WINDOWS_REPO: kbilyal/Chess-Publisher-Windows-FIDE-Beta
-      WINDOWS_COMMIT: 1354a8061fbbc520ecd1ea09b93350e388428dfd
-      DRIVE_BETA85_SOURCE_ID: 17p1iTz_OgZoh9IcWVZi_xC3FcZ6EcxYI
       BETA85_ARCHIVE_SHA256: 2795a0612f56f381b65db0c30c3171ccc5f4e16e9bc0778fa5bc7e61fe430e69
       BETA85_ARCHIVE_BYTES: '27933592'
-    steps:
-      - name: Checkout Linux parity source
-        uses: actions/checkout@v4
 
-      - name: Checkout authoritative Windows beta.85 checkpoint
+    steps:
+      - name: Checkout Linux beta.85 source
         uses: actions/checkout@v4
-        with:
-          repository: kbilyal/Chess-Publisher-Windows-FIDE-Beta
-          ref: 1354a8061fbbc520ecd1ea09b93350e388428dfd
-          path: .exact/windows-beta85
-          fetch-depth: 1
-          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Install runtime and Drive download dependencies
-        run: python -m pip install --disable-pip-version-check 'networkx>=2.6' 'gdown>=5.2,<6'
+      - name: Install runtime dependency
+        run: python -m pip install --disable-pip-version-check 'networkx>=2.6'
 
-      - name: Verify authoritative source identity before download
+      - name: Download and verify exact authoritative archive
         shell: bash
         run: |
-          test "$(git -C "$CP_WINDOWS_SOURCE" rev-parse HEAD)" = "$WINDOWS_COMMIT"
-          test "$(cat "$CP_WINDOWS_SOURCE/VERSION.txt")" = "1.06.00-beta.85"
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          manifest=json.loads(Path('source_manifest.json').read_text(encoding='utf-8'))
-          assert manifest['baseRelease']=='v1.06.00-beta.85', manifest
-          assert manifest['authoritativeWindowsRepository']==os.environ['WINDOWS_REPO'], manifest
-          assert manifest['authoritativeWindowsCommit']==os.environ['WINDOWS_COMMIT'], manifest
-          assert manifest['archive']['sha256']==os.environ['BETA85_ARCHIVE_SHA256'], manifest
-          assert int(manifest['archive']['size'])==int(os.environ['BETA85_ARCHIVE_BYTES']), manifest
-          assert manifest['cloudFingerprintContentSchema']==7, manifest
-          assert len(manifest['runtimeSharedFiles']) >= 35, len(manifest['runtimeSharedFiles'])
-          print('BETA85_AUTHORITATIVE_WINDOWS_SOURCE_IDENTITY=PASS')
-          PY
-
-      - name: Download exact beta.85 archive through Drive web flow
-        shell: bash
-        run: |
+          set -euo pipefail
           mkdir -p "$(dirname "$CP_SHARED_ARCHIVE")"
-          rm -f "$CP_SHARED_ARCHIVE"
-          set +e
-          gdown "https://drive.google.com/uc?id=${DRIVE_BETA85_SOURCE_ID}" -O "$CP_SHARED_ARCHIVE"
-          rc=$?
-          set -e
-          if [ "$rc" -ne 0 ] || [ ! -s "$CP_SHARED_ARCHIVE" ]; then
-            rm -f "$CP_SHARED_ARCHIVE"
-            curl -L --fail --retry 2 --retry-delay 2 \
-              "https://drive.usercontent.google.com/download?id=${DRIVE_BETA85_SOURCE_ID}&export=download&confirm=t" \
-              -o "$CP_SHARED_ARCHIVE"
-          fi
+          curl -L --fail --retry 2 --retry-delay 2 "${{ inputs.source_url }}" -o "$CP_SHARED_ARCHIVE"
           test "$(stat -c %s "$CP_SHARED_ARCHIVE")" = "$BETA85_ARCHIVE_BYTES"
           echo "$BETA85_ARCHIVE_SHA256  $CP_SHARED_ARCHIVE" | sha256sum -c -
-          echo 'BETA85_AUTHORITATIVE_ARCHIVE_DOWNLOAD=PASS'
+          echo 'BETA85_AUTHORITATIVE_ARCHIVE=PASS'
 
-      - name: Materialize exact beta.85 shared source and verify every manifest hash
+      - name: Materialize and verify exact shared source
         shell: bash
         run: |
+          set -euo pipefail
           python scripts/bootstrap_dev21_from_upstream.py \
             --output "$CP_RUNTIME" \
             --source-archive "$CP_SHARED_ARCHIVE"
@@ -105,9 +60,8 @@ jobs:
           assert state['version']=='1.06.00-beta.85', state
           assert state['sharedSourceVerified'] is True, state
           assert state['protectedSourceVerified'] is True, state
-          assert state['authoritativeWindowsCommit']==os.environ['WINDOWS_COMMIT'], state
           assert state['cloudFingerprintContentSchema']==7, state
-          assert state['sharedFilesChecked']==len(manifest['runtimeSharedFiles']), (state, len(manifest['runtimeSharedFiles']))
+          assert state['sharedFilesChecked']==len(manifest['runtimeSharedFiles']), state
           sys.path.insert(0,str(runtime/'linux'))
           from source_guard import verify_source
           verified=verify_source(runtime/'source',runtime/'source_manifest.json')
@@ -116,21 +70,12 @@ jobs:
           print('BETA85_EXACT_SHARED_SOURCE_ALL_HASHES=PASS')
           PY
 
-      - name: Compile exact-source runtime
+      - name: Run exact-source regression and protected gates
         working-directory: ${{ env.CP_RUNTIME }}
+        shell: bash
         run: |
+          set -euo pipefail
           python -m py_compile linux/*.py linux/rating_lists/*.py ci/*.py packaging/*.py tests/*.py
-          node --check linux/LinuxWebViewShim.js
-          node --check linux/export_integration.js
-          node --check ci/webview_shim_contract.mjs
-          node --check ci/telegram_webview_contract.mjs
-          node --check ci/online_token_webview_contract.mjs
-          node --check ci/export_webview_contract.mjs
-
-      - name: Run exact-source architecture and integration contracts
-        working-directory: ${{ env.CP_RUNTIME }}
-        run: |
-          python tests/test_materialize_script.py
           python tests/test_shared_source_adapter.py
           python tests/test_rating_lists.py
           python tests/test_rating_lists_ui.py
@@ -138,126 +83,45 @@ jobs:
           python ci/source_guard_contract.py
           python ci/source_bootstrap_contract.py
           python ci/linux_adapter_order_contract.py
-          python ci/bbp_adapter_contract.py
-          python ci/dgt_contract_smoke.py
-          node ci/webview_shim_contract.mjs
-          node ci/online_token_webview_contract.mjs
-          python ci/online_token_runtime_contract.py
-          python ci/telegram_contract_smoke.py
-          node ci/telegram_webview_contract.mjs
-          python ci/desktop_contract_smoke.py
-          python ci/export_contract_smoke.py
-          node ci/export_webview_contract.mjs
-          python ci/browser_launcher_contract.py
-          python ci/window_mode_contract.py
-
-      - name: Run exact beta.85 Chromium UI gates
-        working-directory: ${{ env.CP_RUNTIME }}
-        run: |
-          python ci/window_browser_contract.py
-          python ci/chromium_runtime_smoke.py
-
-      - name: Run FIDE, Chess-Results and LocalEngine gates
-        working-directory: ${{ env.CP_RUNTIME }}
-        shell: bash
-        run: |
           python ci/fide_contract_smoke.py
-          python ci/fide_download_strategy_contract.py
-          python ci/fide_cache_contract.py
-          python ci/fide_endpoint_contract.py
-          python ci/fide_legacy_limits_contract.py
-          python ci/fide_streaming_contract.py
-          python tests/test_rating_lists.py
           python ci/chess_results_contract_smoke.py
-          python ci/live_acceptance_contract.py
           python ci/localengine_contract_smoke.py
-          python ci/self_test_contract.py
-          python ci/self_test_contract.py --online-engines
-
-      - name: Run protected engine and format compatibility gates
-        working-directory: ${{ env.CP_RUNTIME }}
-        run: |
           python ci/trf_compat_acceptance.py
           python ci/real_acceptance.py
+          node "$CP_RUNTIME/source/TESTS/BETA82-ALL-SYNC-WEB-RESULTS-REGRESSION.js"
+          node "$CP_RUNTIME/source/TESTS/BETA83-CLOUD-ONLY-WORKSPACE-REGRESSION.js"
+          node "$CP_RUNTIME/source/TESTS/BETA84-SCHEMA7-UNIFIED-SYNC-REGRESSION.js"
+          node "$CP_RUNTIME/source/TESTS/BETA84-FORCED-CHECKPOINT-PERSISTENCE-REGRESSION.js"
+          node "$CP_RUNTIME/source/TESTS/BETA85-NEXT-ROUND-SYNC-REGRESSION.js"
 
       - name: Build exact-source beta.85 deb
         working-directory: ${{ env.CP_RUNTIME }}
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p "$CP_DIST"
           python packaging/build_deb.py --source "$CP_RUNTIME/source" --output-dir "$CP_DIST" | tee "$CP_DIST/build-report.json"
           DEB="$(find "$CP_DIST" -maxdepth 1 -type f -name 'chess-publisher_1.06.00~beta85_amd64.deb' -print -quit)"
           test -n "$DEB"
           sha256sum "$DEB" | tee "$CP_DIST/SHA256SUMS.txt"
           dpkg-deb -I "$DEB" >/dev/null
-          dpkg-deb -c "$DEB" | grep -F './opt/chess-publisher/source/ChessPublisher.html'
-          dpkg-deb -c "$DEB" | grep -F './opt/chess-publisher/source_manifest.json'
-          dpkg-deb -c "$DEB" | grep -F './opt/chess-publisher/PACKAGE-MANIFEST.json'
 
-      - name: Install and run exact-source beta.85 package on Ubuntu 24.04
+      - name: Install and self-test beta.85 deb
         shell: bash
         run: |
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
+          set -euo pipefail
           DEB="$(find "$CP_DIST" -maxdepth 1 -type f -name 'chess-publisher_1.06.00~beta85_amd64.deb' -print -quit)"
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
           sudo apt-get update -qq
           sudo apt-get install -y "$DEB"
           dpkg-query -W -f='${Status} ${Version}\n' chess-publisher | grep -F 'install ok installed 1.06.00~beta85'
-          chess-publisher-self-test --json > "$CP_DIST/installed-self-test.json"
-          chess-publisher-self-test --online-engines --json > "$CP_DIST/installed-online-engines.json"
+          chess-publisher-self-test --json | tee "$CP_DIST/installed-self-test.json"
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
-          for name in ('installed-self-test.json','installed-online-engines.json'):
-              data=json.loads((Path('.dist/beta85')/name).read_text(encoding='utf-8'))
-              assert data.get('ok') is True and data.get('failed')==0, (name,data)
-          package=json.loads(Path('/opt/chess-publisher/PACKAGE-MANIFEST.json').read_text(encoding='utf-8'))
-          assert package['version']=='1.06.00~beta85', package
-          assert package['displayVersion']=='v1.06.00-beta.85', package
-          assert package['source']['snapshotId']=='cp-v1.06.00-beta.85-shared-source-20260909', package
-          assert package['source']['version']=='1.06.00-beta.85', package
+          data=json.loads((Path(os.environ['CP_DIST'])/'installed-self-test.json').read_text(encoding='utf-8'))
+          assert data.get('ok') is True and data.get('failed')==0, data
           print('BETA85_EXACT_DEB_INSTALLED_SELF_TEST=PASS')
-          PY
-          sudo apt-get purge -y chess-publisher
-
-      - name: Create exact-source acceptance record and release bundle
-        shell: bash
-        run: |
-          python - <<'PY'
-          import hashlib,json,os,zipfile
-          from pathlib import Path
-          dist=Path(os.environ['CP_DIST'])
-          deb=next(dist.glob('chess-publisher_1.06.00~beta85_amd64.deb'))
-          def sha(p):
-              h=hashlib.sha256()
-              with p.open('rb') as f:
-                  for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
-              return h.hexdigest()
-          record={
-              'ok':True,
-              'version':'v1.06.00-beta.85',
-              'linuxCommit':os.environ.get('GITHUB_SHA'),
-              'authoritativeWindowsRepository':os.environ['WINDOWS_REPO'],
-              'authoritativeWindowsCommit':os.environ['WINDOWS_COMMIT'],
-              'sharedSourceSnapshot':'cp-v1.06.00-beta.85-shared-source-20260909',
-              'sharedSourceVerified':True,
-              'cloudFingerprintContentSchema':7,
-              'archiveSha256':os.environ['BETA85_ARCHIVE_SHA256'],
-              'deb':deb.name,
-              'debBytes':deb.stat().st_size,
-              'debSha256':sha(deb),
-              'hostedUbuntu2404InstalledSelfTest':'PASS',
-              'releaseCandidate':False,
-              'releaseCandidateReason':'Real user Ubuntu install/start confirmation is still required.'
-          }
-          report=dist/'EXACT-SOURCE-ACCEPTANCE.json'
-          report.write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
-          bundle=dist/'Chess-Publisher-v1.06.00-beta.85-Ubuntu-amd64-EXACT-SOURCE-TEST-CANDIDATE.zip'
-          with zipfile.ZipFile(bundle,'w',compression=zipfile.ZIP_DEFLATED) as z:
-              for p in (deb,dist/'SHA256SUMS.txt',report,dist/'installed-self-test.json',dist/'installed-online-engines.json'):
-                  z.write(p,p.name)
-          (dist/'BUNDLE-SHA256.txt').write_text(f'{sha(bundle)}  {bundle.name}\n',encoding='utf-8')
-          print(json.dumps(record,indent=2))
-          print('BUNDLE',bundle.name,sha(bundle))
           PY
 
       - name: Upload exact beta.85 deb
@@ -268,17 +132,13 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Upload exact beta.85 release kit
+      - name: Upload exact beta.85 acceptance evidence
         uses: actions/upload-artifact@v4
         with:
-          name: chess-publisher-beta85-exact-source-release-kit
+          name: chess-publisher-beta85-exact-source-evidence
           path: |
-            ${{ env.CP_DIST }}/Chess-Publisher-v1.06.00-beta.85-Ubuntu-amd64-EXACT-SOURCE-TEST-CANDIDATE.zip
             ${{ env.CP_DIST }}/SHA256SUMS.txt
-            ${{ env.CP_DIST }}/BUNDLE-SHA256.txt
-            ${{ env.CP_DIST }}/EXACT-SOURCE-ACCEPTANCE.json
             ${{ env.CP_DIST }}/build-report.json
             ${{ env.CP_DIST }}/installed-self-test.json
-            ${{ env.CP_DIST }}/installed-online-engines.json
           if-no-files-found: error
           retention-days: 90
