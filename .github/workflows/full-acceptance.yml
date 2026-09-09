@@ -1,13 +1,15 @@
-name: Linux Full Protected Acceptance
+name: Linux beta.81 Platform Acceptance
 
 on:
   push:
     branches: [main]
     paths:
       - 'linux/**'
+      - 'ci/**'
       - 'tests/**'
       - 'scripts/bootstrap_dev21_from_upstream.py'
       - 'VERSION'
+      - 'VERSION.txt'
       - 'source_manifest.json'
       - '.github/workflows/full-acceptance.yml'
   workflow_dispatch:
@@ -16,96 +18,67 @@ permissions:
   contents: read
 
 jobs:
-  protected-acceptance:
+  platform-acceptance:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
       CP_RUNTIME: ${{ github.workspace }}/.runtime/materialized
     steps:
-      - name: Checkout dedicated Linux source
+      - name: Checkout Linux parity source
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-
-      - name: Install protected runtime dependency
+      - name: Install runtime dependency
         run: python -m pip install --disable-pip-version-check 'networkx>=2.6'
-
-      - name: Materialize dev21 runtime plus current Linux overlay fail-closed
+      - name: Materialize platform runtime fail-closed without shared source
         run: |
-          python scripts/bootstrap_dev21_from_upstream.py \
-            --output "$CP_RUNTIME" \
-            --allow-source-unavailable
+          python scripts/bootstrap_dev21_from_upstream.py --output "$CP_RUNTIME" --allow-source-unavailable
           test -f "$CP_RUNTIME/MATERIALIZED_STATE.json"
-          test -f "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
+          test -f "$CP_RUNTIME/linux/beta81_shared_source_integration.py"
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
-          test -f "$CP_RUNTIME/linux/web_results_download.js"
-          test -f "$CP_RUNTIME/linux/web_results_download_integration.py"
-          test -f "$CP_RUNTIME/linux/cloud_unified_sync.js"
-          test -f "$CP_RUNTIME/linux/cloud_unified_sync_integration.py"
           python - <<'PY'
           import json, os
           from pathlib import Path
-          state = json.loads((Path(os.environ['CP_RUNTIME']) / 'MATERIALIZED_STATE.json').read_text())
-          assert state['protectedSourceVerified'] is False, state
+          state=json.loads((Path(os.environ['CP_RUNTIME'])/'MATERIALIZED_STATE.json').read_text())
+          assert state['version']=='1.06.00-beta.81', state
+          assert state['sharedSourceSnapshot']=='cp-v1.06.00-beta.81-shared-source-20260909', state
+          assert state['sharedSourceVerified'] is False, state
+          assert state['olderBeta34SharedSourceAllowed'] is False, state
           assert state['oldUpstreamRootSourceAllowed'] is False, state
-          assert state['protectedSourceOrigin'] == 'unavailable', state
-          print('HOSTED_PROTECTED_SOURCE_FAIL_CLOSED=PASS')
+          print('HOSTED_BETA81_SHARED_SOURCE_FAIL_CLOSED=PASS')
           PY
-          if [ -e "$CP_RUNTIME/source/ChessPublisher.html" ]; then
-            echo '::error::Hosted materializer substituted a protected source file unexpectedly.'
-            exit 1
-          fi
-
-      - name: Verify current Linux overlay identity
+          if [ -e "$CP_RUNTIME/source/ChessPublisher.html" ]; then echo '::error::Hosted platform materializer substituted shared source unexpectedly.'; exit 1; fi
+      - name: Verify beta.81 Linux adapter identity
         run: |
-          grep -F 'linux-dev.23' "$CP_RUNTIME/linux/build_info.py"
-          grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
-          grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
-          grep -F 'apply_cloud_unified_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
-          grep -F 'Download Results' "$CP_RUNTIME/linux/web_results_download.js"
-          grep -F '/arbiter-results/ack' "$CP_RUNTIME/linux/web_results_download.js"
-          grep -F '⟳ SYNC' "$CP_RUNTIME/linux/cloud_unified_sync.js"
-          grep -F 'legacyCloudRefreshList' "$CP_RUNTIME/linux/cloud_unified_sync.js"
-
-      - name: Compile runtime and Linux modules
+          grep -F 'APP_BUILD = "1.06.00-beta.81"' "$CP_RUNTIME/linux/build_info.py"
+          grep -F 'apply_beta81_shared_source()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          ! grep -F 'apply_cloud_directional_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          ! grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          ! grep -F 'apply_cloud_unified_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          ! grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          grep -F '/source/webview/CloudWorkspaceRedesign.js' "$CP_RUNTIME/linux/beta81_shared_source_integration.py"
+      - name: Compile platform runtime and adapters
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python -m py_compile linux/*.py linux/rating_lists/*.py ci/*.py packaging/*.py tests/*.py
           node --check linux/LinuxWebViewShim.js
           node --check linux/export_integration.js
-          node --check linux/web_results_download.js
-          node --check linux/cloud_unified_sync.js
-          node --check tests/web_results_reconcile_contract.mjs
-          node --check tests/web_results_pending_flow_contract.mjs
-          node --check tests/cloud_unified_sync_contract.mjs
-          node --check tests/cloud_sync_dev23_regression.mjs
           node --check ci/webview_shim_contract.mjs
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
           node --check ci/export_webview_contract.mjs
-
-      - name: Run deterministic Linux integration contracts
+      - name: Run beta.81 architecture and native integration contracts
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
-          python tests/test_rating_lists.py
-          python tests/test_rating_lists_ui.py
           python tests/test_materialize_script.py
-          python tests/test_web_results_download.py
-          node tests/web_results_reconcile_contract.mjs
-          node tests/web_results_pending_flow_contract.mjs
-          node tests/cloud_unified_sync_contract.mjs
-          node tests/cloud_sync_dev23_regression.mjs
-
-      - name: Run protected-source policy and adapter contracts
-        working-directory: ${{ env.CP_RUNTIME }}
-        run: |
+          python tests/test_beta81_shared_source_adapter.py
+          python tests/test_rating_lists.py
           python ci/source_guard_contract.py
           python ci/source_bootstrap_contract.py
-          python ci/bbp_adapter_contract.py
           python ci/linux_adapter_order_contract.py
+          python ci/bbp_adapter_contract.py
           python ci/dgt_contract_smoke.py
           node ci/webview_shim_contract.mjs
           node ci/online_token_webview_contract.mjs
@@ -117,8 +90,7 @@ jobs:
           node ci/export_webview_contract.mjs
           python ci/browser_launcher_contract.py
           python ci/window_mode_contract.py
-
-      - name: Run real Chromium UI gates
+      - name: Run real Chromium platform gates
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python ci/window_browser_contract.py
@@ -129,8 +101,7 @@ jobs:
           set -e
           if [ "$rc" -eq 77 ]; then exit 0; fi
           exit "$rc"
-
-      - name: Run FIDE and integrated rating-list gates
+      - name: Run FIDE and Linux native rating-data gates
         working-directory: ${{ env.CP_RUNTIME }}
         shell: bash
         run: |
@@ -146,8 +117,7 @@ jobs:
           python ci/fide_legacy_limits_contract.py
           python ci/fide_streaming_contract.py
           python tests/test_rating_lists.py
-
-      - name: Run Chess-Results and LocalEngine gates
+      - name: Run Chess-Results and LocalEngine platform gates
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python ci/chess_results_contract_smoke.py
@@ -155,39 +125,36 @@ jobs:
           python ci/localengine_contract_smoke.py
           python ci/self_test_contract.py
           python ci/self_test_contract.py --online-engines
-
       - name: Install and self-test packages on Ubuntu 24.04 and 26.04
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python ci/deb_install_smoke.py
           python ci/ubuntu_2604_container_smoke.py
-
-      - name: Run TRF16 TRF26 Gacrux BBP Tie-Break acceptance
+      - name: Run protected engine format compatibility gates
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python ci/trf_compat_acceptance.py
           python ci/real_acceptance.py
-
-      - name: Upload acceptance report
+      - name: Upload platform acceptance report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linux-dev23-full-acceptance-report
+          name: linux-beta81-platform-acceptance-report
           path: ${{ env.CP_RUNTIME }}/tests/logs/real-linux-acceptance.json
           if-no-files-found: warn
           retention-days: 90
-
-      - name: Upload accepted runtime-only kit
+      - name: Upload beta.81 platform-only runtime kit
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: chess-publisher-linux-dev23-runtime-only-kit
+          name: chess-publisher-linux-beta81-platform-only-kit
           path: |
             ${{ env.CP_RUNTIME }}/linux
             ${{ env.CP_RUNTIME }}/packaging
             ${{ env.CP_RUNTIME }}/source_manifest.json
             ${{ env.CP_RUNTIME }}/fide-cache
             ${{ env.CP_RUNTIME }}/VERSION
+            ${{ env.CP_RUNTIME }}/VERSION.txt
             ${{ env.CP_RUNTIME }}/MATERIALIZED_STATE.json
           if-no-files-found: error
           retention-days: 14
