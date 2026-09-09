@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download exact dev21 runtime artifact from upstream acceptance
+      - name: Download accepted dev21 runtime artifact
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
@@ -24,10 +24,18 @@ jobs:
           run-id: 34251523583
           name: chess-publisher-linux-runtime-kit
           path: .runtime/dev21-artifact
-      - name: Inspect recovered artifact
+      - name: Verify runtime continuity boundary
         run: |
           set -euxo pipefail
-          find .runtime/dev21-artifact -maxdepth 3 -type f | sort | head -120
-          find .runtime/dev21-artifact -type f -name 'ChessPublisher.html' -print -exec sha256sum {} \;
-          test "$(find .runtime/dev21-artifact -type f -name ChessPublisher.html -exec sha256sum {} \; | awk '{print $1}' | head -1)" = "f51355b1a449870be6ed69d1bb941c19a9d8d2bdf3c8f91da845b4bc1275f310"
-          echo 'DEV21_ARTIFACT_PROTECTED_SOURCE=PASS'
+          test -f .runtime/dev21-artifact/linux/chess_publisher_linux_entry.py
+          test -f .runtime/dev21-artifact/linux/build_info.py
+          test -f .runtime/dev21-artifact/packaging/build_deb.py
+          test -f .runtime/dev21-artifact/source_manifest.json
+          if find .runtime/dev21-artifact -type f -name 'ChessPublisher.html' | grep -q .; then
+            echo '::error::Accepted runtime-only artifact unexpectedly contains protected source.'
+            exit 1
+          fi
+          grep -F '1.06.00-beta.34-linux-dev.21' .runtime/dev21-artifact/linux/build_info.py
+          echo 'DEV21_RUNTIME_ARTIFACT_CONTINUITY=PASS'
+          echo 'DEV21_RUNTIME_ARTIFACT_NO_PROTECTED_SOURCE=PASS'
+          echo '::notice::Exact protected source is a separate SHA256-pinned package input and was never part of the dev21 runtime artifact.'
