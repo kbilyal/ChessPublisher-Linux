@@ -1,5 +1,42 @@
 # Linux changelog
 
+## v1.06.00-beta.34-linuxdev23 — DEVELOPMENT / TEST
+- Replaced the normal directional `Upload Current` / `Pull Current` workflow with one explicit `SYNC` control.
+- Kept the existing canonical Cloud identity model; no second ID model was introduced.
+  - `cloud.internalId` / Cloud `localKey` remain the stable logical identity.
+  - `cloud.cloudTournamentId` remains the linked Cloud object identity.
+  - Rename, revision, filename and import origin do not change identity.
+- `SYNC` delegates BASE/LOCAL/REMOTE classification and field-level merge to the existing directional engine.
+  - Desktop-only change -> push.
+  - Cloud-only change -> pull.
+  - No change -> In Sync.
+  - Non-overlapping two-sided changes -> safe merge and push in one SYNC operation.
+  - Same-field divergence -> explicit conflict resolution; no silent overwrite.
+- Removed normal `Upload as New` access for an already linked current tournament and hides obsolete `Upload Current` / `Pull Current` controls.
+- Removed the `Public List` block from the Linux normal Cloud UI.
+- `Refresh` now reuses the existing My Online Tournaments list refresh and status check only. It never performs hidden push/pull or resolves conflicts.
+- Autosave remains local-only.
+- `Download Results` remains a separate results-only action.
+  - Exact board number + White/Black key identity only.
+  - Web blank result never deletes a Desktop result.
+  - Pairing mismatch is skipped; no guessing or color swapping.
+  - Only `board.result` may change.
+  - Result conflicts now use explicit `Keep Desktop` / `Use Web` buttons instead of OK/Cancel semantics.
+  - Accepted result decisions are saved locally and passed through the same unified Cloud SYNC before pending Web submissions can be acknowledged.
+  - If SYNC does not reach `In Sync`, the local decision stays saved but the Web submission remains pending for safe retry.
+- Added `cloud_sync_dev23_regression.mjs` covering the 21 requested identity/sync/result/Refresh/Autosave contracts.
+- Full acceptance workflow updated to dev23 build identity and to execute the new sync regression; protected acceptance commands remain unchanged.
+- No protected source/core was modified.
+- Status: **DEVELOPMENT / TEST**. Not final/stable until full protected acceptance and real Ubuntu runtime confirmation.
+
+## v1.06.00-beta.34-linuxdev22 — TEST CANDIDATE
+- Dedicated `kbilyal/ChessPublisher-Linux` repository established as Linux source of truth.
+- Added integrated FIDE Standard/Rapid/Blitz local reference database with generation-based SQLite, atomic activation and rollback safety.
+- Added Pairings `Download Results` for pending Arbiter Access Web results with result-only matching/mutation safety.
+- Reworked protected-source materialization to fail closed and retain exact SHA256-pinned source identity.
+- Linux Full Protected Acceptance #17 (`34359612332`) SUCCESS at runtime commit `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
+- Exact dev22 protected-source package self-test PASS; dev22 remained a test candidate, not final/stable.
+
 ## v1.06.00-beta.34-linuxdev21
 - Fluidity v2 integrated.
 - Pairings Result Desk fixed; board table scrolls independently.
@@ -11,54 +48,3 @@
 - TRF16/TRF26 PASS.
 - Chess-Results secure Worker contract PASS.
 - Gacrux 1.9.57 / BBP / Tie-Break PASS.
-
-## v1.06.00-beta.34-linuxdev22 — TEST CANDIDATE
-- Dedicated `kbilyal/ChessPublisher-Linux` repository established as Linux source of truth.
-- Added integrated FIDE Standard/Rapid/Blitz local reference database.
-- Added generation-based SQLite index with exact FIDE-ID lookup.
-- Added Unicode NFKD case/accent/punctuation-normalized name search.
-- Added atomic three-list activation; failed download/parse/index keeps the previous complete generation.
-- Added persistent update metadata/checksums and human-readable last successful update report.
-- Rating-list update explicitly does **not** mutate tournament players.
-- Added Linux UI adapter: Standard/Rapid/Blitz cards, `Update Rating Lists`, `View Last Update Report`, `Review Player Updates`.
-- Linux search uses the integrated LocalEngine database first instead of scanning/rebuilding the giant browser FIDE map.
-- Manual/offline rating-list import remains available as fallback.
-- Added `/fide/rating-lists/status` and `/fide/rating-lists/report` LocalEngine endpoints.
-- Added Pairings `Download Results` for pending Arbiter Access Web results.
-  - Current editable round only.
-  - Exact `whiteKey + blackKey` board identity; pairing differences are skipped, never guessed.
-  - Empty Desktop result + Web result: Web result is applied automatically.
-  - Same result: no change.
-  - Different populated Desktop/Web results: organizer chooses which result remains.
-  - Empty Web result never erases a Desktop result.
-  - Only `board.result` is mutated; pairings, colors, players and starting numbers are untouched.
-  - Web submissions are acknowledged only after successful local save; acknowledgement failure keeps the Web submission available for retry.
-- `Download Results` targeted CI #5 (`34334839940`) SUCCESS.
-- Reworked dev21 continuity materialization to fail closed:
-  - old upstream root protected source is forbidden;
-  - hosted CI may materialize runtime-only with `protectedSourceVerified=false`;
-  - exact package builds require the SHA256-pinned protected source archive.
-- Continuity Recovery Probe #2 (`34359640237`) SUCCESS.
-- Full dev22 hosted runtime acceptance #17 (`34359612332`) SUCCESS at runtime commit `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
-  - dev22 deterministic contracts PASS.
-  - adapter/source-policy contracts PASS.
-  - Chromium UI gates PASS.
-  - FIDE + integrated Rating Lists PASS.
-  - Chess-Results + LocalEngine PASS.
-  - Ubuntu 24.04 and Ubuntu 26.04 install/self-test PASS.
-  - TRF16/TRF26 PASS.
-  - Gacrux 1.9.57 / BBP / Tie-Break PASS.
-- Accepted runtime-only artifact:
-  - `chess-publisher-linux-dev22-runtime-only-kit`
-  - artifact ID `10107299648`
-  - digest `sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac`
-- Exact protected-source package gate PASS using snapshot `cp-v1.06.00-beta.34-linux-source-20260907`.
-- Exact package self-test PASS: 6 passed, 0 failed.
-- Test candidate:
-  - `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`
-  - 31,814,980 bytes
-  - SHA256 `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`
-  - package version `1.06.00~beta34+linuxdev22`
-  - app build `1.06.00-beta.34-linux-dev.22`
-  - engine `0.7.0-linux-dev`
-- This is a **TEST CANDIDATE**, not yet promoted to final/stable. User installation/start confirmation remains the final runtime gate before promotion.

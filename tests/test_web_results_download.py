@@ -19,12 +19,18 @@ required=(
     'buildReconcilePlan',
     'pairingIdentity',
     'board.result=item.remoteResult',
-    'Which result should remain?',
-    'OK = Web · Cancel = Desktop',
+    'Keep Desktop',
+    'Use Web',
+    'cpKeepDesktopResultBtn',
+    'cpUseWebResultBtn',
     "remoteResult==='-'",
     'RESULT-ONLY SAFETY',
     'exact board number + White/Black key matching',
+    'synchronizeResultsToCanonicalBase',
+    'cpUnifiedSync',
+    'cpCloudCheckStatus',
     'lastWebResultsDownloadRevision',
+    'lastWebResultsSyncAt',
     'lastWebResultsAcknowledgedCount',
 )
 for marker in required:
@@ -39,6 +45,8 @@ for forbidden in (
     'localBoards[item.localIndex]=',
     'whiteKey=item.',
     'blackKey=item.',
+    'OK = Web',
+    'Cancel = Desktop',
 ):
     if forbidden in JS:
         raise SystemExit(f'FORBIDDEN_JS: {forbidden}')

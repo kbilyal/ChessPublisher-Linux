@@ -1,118 +1,89 @@
 # AI HANDOFF — READ THIS FIRST
 
-You are continuing Chess-Publisher Linux from the dedicated authoritative repository:
-`kbilyal/ChessPublisher-Linux`, branch `main`.
+Continue Chess-Publisher Linux only from `kbilyal/ChessPublisher-Linux`, branch `main`.
 
 ## Current development state
-- Version: `v1.06.00-beta.34-linuxdev22`
-- Status: **TEST CANDIDATE** — not final/stable yet.
-- Always inspect the actual current Git HEAD before writing; documentation commits may be newer than the accepted runtime commit.
-- Accepted dev22 runtime commit: `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
-- dev22 Linux Full Protected Acceptance #17, run `34359612332`: **SUCCESS**.
-- Continuity Recovery Probe #2, run `34359640237`: **SUCCESS**.
-- dev21 immutable baseline: `kbilyal/ChessPublisher@5e0b37708cbef2828ec60d7e6faa247d4ecc904d`.
-- dev21 Linux Ubuntu Acceptance #242: SUCCESS.
+- Version: `v1.06.00-beta.34-linuxdev23`.
+- Status: **DEVELOPMENT / TEST**, not final/stable.
+- The last fully accepted runtime/package baseline remains dev22 until dev23 full protected acceptance and real Ubuntu runtime confirmation pass.
+- Always inspect the actual current `main` HEAD before writing. Repository state overrides old chat context.
 
-## Start every new chat/agent here
+## Start every new agent/chat here
 1. Read `CURRENT_STATE.json`.
-2. Read `CHANGELOG-LINUX.md`.
-3. Read `docs/PROTECTED_COMPONENTS.md`.
-4. Read `docs/RATING_LIST_INTEGRATION_PLAN.md`.
+2. Read `AI_HANDOFF.md`.
+3. Read `CHANGELOG-LINUX.md`.
+4. Read `docs/PROTECTED_COMPONENTS.md`.
 5. Inspect current `main` HEAD and recent commits.
-6. Materialize through `scripts/bootstrap_dev21_from_upstream.py` only.
+6. Materialize only through `scripts/bootstrap_dev21_from_upstream.py`.
 
-## Materialization / protected-source rule
-The upstream git root does **not** contain the exact protected source used by the accepted Linux package. Never substitute its old `ChessPublisher.html`.
+## dev23 Cloud synchronization
+- Normal Linux Cloud control is one `SYNC` button.
+- Do not restore separate normal `Upload Current`, `Pull Current` or `Upload as New` workflows.
+- Do not introduce a second tournament identity model.
+- Canonical identity remains the existing directional model: `cloud.internalId` / Cloud `localKey` plus `cloud.cloudTournamentId` after linking.
+- Identity must never depend on name, filename, `Imported`, revision or where the tournament was created.
+- The existing directional engine owns BASE/LOCAL/REMOTE using `baseRevision`, historical Cloud revision and content fingerprints.
+- `SYNC` behavior:
+  - LOCAL only -> push;
+  - REMOTE only -> pull;
+  - same -> In Sync;
+  - non-overlapping two-sided changes -> field merge then push in the same SYNC;
+  - same-field divergence -> explicit Keep Desktop / Keep Cloud conflict resolution; never silently choose.
+- `Refresh` is not SYNC. It refreshes My Online Tournaments/list metadata and Cloud status only; it must not push, pull, change current tournament or resolve conflicts.
+- Autosave remains local-only.
+- `Public List` is not part of the normal Linux Cloud UI.
 
-The materializer is non-destructive and fail-closed:
-- reconstructs the immutable dev21 runtime in a separate output directory;
-- overlays current dedicated-repo Linux/tests/scripts deltas;
-- accepts exact protected source through `--source-archive`, `--source-root`, or `CP_PROTECTED_SOURCE_ARCHIVE`;
-- hosted CI may use `--allow-source-unavailable`, which must record `protectedSourceVerified=false` and must not stage a fake protected source;
-- exact package candidates require the separately verified protected source.
-
-Protected recovery archive identity:
-- name: `Chess-Publisher-v1.06.00-beta.34-protected-source.tar.gz`
-- SHA256: `19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff`
-- source snapshot: `cp-v1.06.00-beta.34-linux-source-20260907`
-
-## Mandatory Git rule
-Every completed Linux fix must be committed and pushed here before it is reported as complete.
-No force push. Re-read branch HEAD before updating. Never overwrite concurrent commits.
-
-## Release rule
-The current dev22 package is a **TEST CANDIDATE**. Do not promote it to final/stable until the user installs it on Ubuntu, starts the real app, and confirms runtime behavior. A successful launch alone is not permission to modify protected core.
-
-## Protected components
-Do not modify unless explicitly authorized:
-- Gacrux 1.9.57
-- Swiss Dutch pairing
-- TRF16/TRF26 core
-- BBP checker
-- Tie-Break core/checker
-- Chess-Results protocol/core
-
-## dev22 Rating Lists
-Already implemented and accepted:
-- Standard / Rapid / Blitz providers.
-- Installation-local generation-based SQLite reference database.
-- Exact FIDE-ID lookup.
-- Case/accent/punctuation tolerant normalized name search.
-- Explicit full update only; no full network download on startup.
-- Three-list atomic activation and previous-generation rollback safety.
-- Persistent status/metadata/checksums/update report.
-- Linux UI cards and explicit `Review Player Updates` action.
-- Full rating-list update does NOT mutate `tournament.players`.
-- Linux full update/search are server-authoritative.
-- Manual/offline lists remain fallback.
-
-## Pairings Download Results
-Already implemented and accepted:
-- Button: `Download Results` in Pairings toolbar.
-- Source: pending Arbiter Access Web result queue (`/arbiter-results`), not the ordinary Cloud snapshot.
+## dev23 Download Results
+- `Download Results` remains in Pairings and is results-only.
 - Selected editable round only.
-- Exact `whiteKey + blackKey` board identity.
-- Blank Desktop + Web result => apply Web automatically.
-- Same => no change.
-- Different populated results => ask which stays, Web or Desktop.
+- Exact board number + `whiteKey` + `blackKey`; do not infer, swap colors or remap pairings.
+- Blank Desktop + Web result -> Web may fill.
+- Same -> no board change.
+- Different populated results -> explicit `Keep Desktop` / `Use Web` buttons.
 - Blank Web never erases Desktop.
-- Pairing mismatch => skip; never infer or swap colors.
-- Mutation boundary: `board.result` only.
-- Pending Web submissions are acknowledged only after local save succeeds; ack failure leaves them available for retry.
-- Targeted Linux Web Results Download CI #5, run `34334839940`: SUCCESS.
+- Mutation boundary is **only** `board.result`.
+- Critical ordering: save accepted local result decisions -> unified SYNC on the same canonical Cloud identity -> verify `In Sync` -> ACK pending Web submissions.
+- If SYNC fails/conflicts/offline, local changes may remain saved but Web submissions must remain pending for retry.
 
-## Accepted dev22 runtime gate
-Linux Full Protected Acceptance #17, run `34359612332`, runtime commit `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`: SUCCESS.
-The run passed:
-- fail-closed materialization;
-- dev22 deterministic contracts;
-- adapter/source-policy contracts;
-- Chromium UI;
-- FIDE + integrated Rating Lists;
-- Chess-Results + LocalEngine;
-- Ubuntu 24.04 + Ubuntu 26.04 install/self-test;
-- TRF16/TRF26;
-- Gacrux 1.9.57 / BBP / Tie-Break.
+## dev23 tests
+Targeted pre-commit checks added/passing before branch write:
+- 21-point `cloud_sync_dev23_regression.mjs` contract.
+- unified SYNC contract.
+- Web results reconcile contract.
+- pending Web results flow contract.
+- result-only static safety contract.
+- JavaScript syntax checks.
 
-Accepted runtime-only artifact:
-- name `chess-publisher-linux-dev22-runtime-only-kit`
-- artifact ID `10107299648`
-- digest `sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac`
+After the commit, inspect both GitHub workflows:
+- `Linux Web Results Download`.
+- `Linux Full Protected Acceptance`.
+Do not call dev23 accepted until the relevant GitHub runs pass.
 
-## Exact dev22 package candidate
-Built from the accepted runtime-only artifact + exact protected source.
-- file: `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`
-- package version: `1.06.00~beta34+linuxdev22`
-- architecture: `amd64`
-- bytes: `31814980`
-- SHA256: `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`
-- app build: `1.06.00-beta.34-linux-dev.22`
-- engine: `0.7.0-linux-dev`
-- runtime files: 51
-- FIDE seed files: 3
-- bytecode included: false
-- exact protected source verification: PASS
-- extracted-package self-test: **PASS — 6 passed, 0 failed**
+## Last accepted dev22 baseline
+- Runtime commit: `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
+- Linux Full Protected Acceptance #17 / run `34359612332`: SUCCESS.
+- Runtime-only artifact: `chess-publisher-linux-dev22-runtime-only-kit`, artifact ID `10107299648`, digest `sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac`.
+- Last exact package: `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`, SHA256 `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`.
 
-## Next task
-Have the user install/start the exact dev22 `.deb` test candidate on Ubuntu and test the real UI, especially Pairings `Download Results`, Result Desk, Chess-Results visibility, Cloud/Arbiter result flow, and normal tournament persistence. If that runtime gate passes, record the confirmation and decide on promotion without rebuilding or touching protected core.
+## Protected-source/materialization rule
+The upstream Git root does not contain the exact protected source used by the accepted Linux package. Never substitute the old root `ChessPublisher.html`.
+- Immutable source baseline: `kbilyal/ChessPublisher@5e0b37708cbef2828ec60d7e6faa247d4ecc904d`.
+- Protected snapshot: `cp-v1.06.00-beta.34-linux-source-20260907`.
+- Protected recovery archive SHA256: `19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff`.
+- Hosted CI may materialize runtime-only with `protectedSourceVerified=false`; exact package candidates require verified protected source.
+
+## Protected components — do not modify without explicit approval
+- Gacrux 1.9.57.
+- Swiss Dutch pairing.
+- TRF16/TRF26 core and TRF pairing path.
+- BBP checker.
+- Tie-Break core/checker.
+- Chess-Results protocol/core.
+- Player/pairing identity semantics.
+- Tournament file format.
+
+## Git rule
+Every completed Linux fix must be committed and pushed to `ChessPublisher-Linux/main`. No force push. Re-read HEAD before branch update and never overwrite a concurrent commit.
+
+## Next gate
+Run and inspect dev23 hosted workflows. If full protected acceptance passes, build an exact protected-source dev23 test candidate, then install/start/test it on Ubuntu before any final/stable promotion.

@@ -2,130 +2,81 @@
   "project": "Chess-Publisher Linux",
   "repository": "kbilyal/ChessPublisher-Linux",
   "authoritativeBranch": "main",
-  "version": "v1.06.00-beta.34-linuxdev22",
-  "status": "TEST CANDIDATE - hosted dev22 runtime acceptance SUCCESS; exact protected-source package verification and self-test PASS",
-  "baseline": {
-    "sourceProject": "kbilyal/ChessPublisher",
-    "sourceBranchBeforeSplit": "linux-ubuntu-port",
-    "sourceCommitBeforeSplit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
-    "version": "v1.06.00-beta.34-linuxdev21",
-    "acceptanceWorkflow": "Linux Ubuntu Acceptance",
-    "acceptanceRunNumber": 242,
-    "acceptanceRunId": 34251523583,
-    "conclusion": "success"
-  },
-  "acceptedRuntime": {
-    "commit": "eeb30c4cb08ec4dd760b1af800c5d3c56700c557",
+  "version": "v1.06.00-beta.34-linuxdev23",
+  "status": "DEVELOPMENT / TEST - unified Cloud SYNC implemented; not final/stable until full protected acceptance and user runtime confirmation",
+  "acceptedBaseline": {
+    "version": "v1.06.00-beta.34-linuxdev22",
+    "runtimeCommit": "eeb30c4cb08ec4dd760b1af800c5d3c56700c557",
     "workflow": "Linux Full Protected Acceptance",
     "runNumber": 17,
     "runId": 34359612332,
-    "jobId": 102492922586,
     "conclusion": "success",
-    "scope": [
-      "fail-closed materialization",
-      "dev22 deterministic contracts",
-      "adapter/source-policy contracts",
-      "Chromium UI",
-      "FIDE + integrated Rating Lists",
-      "Chess-Results + LocalEngine",
-      "Ubuntu 24.04 + Ubuntu 26.04 install/self-test",
-      "TRF16/TRF26",
-      "Gacrux 1.9.57",
-      "BBP",
-      "Tie-Break"
-    ],
     "artifact": {
       "name": "chess-publisher-linux-dev22-runtime-only-kit",
       "id": 10107299648,
       "digest": "sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac"
     }
   },
-  "ratingLists": {
-    "architecture": "installation-local integrated Standard/Rapid/Blitz reference database; separate from tournament state",
-    "database": "generation-based SQLite",
-    "update": "three-list atomic activation with previous-generation rollback safety",
-    "search": "exact FIDE ID + Unicode NFKD case/accent/punctuation-normalized name search",
-    "report": "persistent human-readable last successful update report",
-    "ui": "Integrated Rating Lists cards + Update Rating Lists + View Last Update Report + Review Player Updates",
-    "browserStrategy": "Linux full updates are server-authoritative and do not sequentially rebuild the giant browser FIDE map; search uses LocalEngine first",
-    "tournamentPlayersChangedByUpdate": false,
-    "ci": [
-      {"runNumber": 1, "runId": 34262834916, "conclusion": "success", "scope": "parser/store atomicity/search"},
-      {"runNumber": 2, "runId": 34264563985, "conclusion": "success", "scope": "UI/status/report/server-search contracts"},
-      {"runNumber": 3, "runId": 34264883467, "conclusion": "success", "scope": "non-destructive materializer continuity"}
-    ]
+  "materialization": {
+    "sourceProject": "kbilyal/ChessPublisher",
+    "sourceCommit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
+    "script": "scripts/bootstrap_dev21_from_upstream.py",
+    "oldUpstreamRootProtectedSourceAllowed": false,
+    "protectedSourceSnapshot": "cp-v1.06.00-beta.34-linux-source-20260907",
+    "protectedSourceArchive": "Chess-Publisher-v1.06.00-beta.34-protected-source.tar.gz",
+    "protectedSourceArchiveSha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff"
   },
-  "downloadResults": {
+  "cloudSyncDev23": {
+    "ui": "single SYNC control plus Refresh; Upload Current, Pull Current, Upload as New and Public List are removed from normal Linux UI",
+    "identity": "delegates to the existing canonical directional layer: stable cloud.internalId/localKey and cloud.cloudTournamentId; never tournament name, filename, Imported state or revision",
+    "base": "existing directional layer uses baseRevision plus content fingerprint and historical Cloud revision as BASE",
+    "threeWay": "BASE/LOCAL/REMOTE; local-only push; remote-only pull; no-change In Sync; non-overlapping conflict merges then pushes in the same SYNC; same-field conflict requires explicit Keep Desktop/Keep Cloud choice",
+    "refresh": "reuses the existing cpCloudRefreshList for My Online Tournaments metadata and performs status check only; no hidden push/pull/conflict resolution",
+    "autosave": "local only; no automatic Cloud push"
+  },
+  "downloadResultsDev23": {
     "location": "Pairings toolbar",
     "label": "Download Results",
     "source": "pending Arbiter Access Web result queue",
     "scope": "selected editable round only",
-    "matching": "exact whiteKey + blackKey pairing identity",
+    "matching": "exact board number + whiteKey + blackKey pairing identity",
     "blankDesktop": "apply Web result automatically",
-    "sameResult": "no change",
-    "conflict": "ask user whether Web or Desktop result stays",
+    "sameResult": "no board change",
+    "conflict": "explicit Keep Desktop / Use Web buttons",
     "blankWeb": "never erase Desktop result",
-    "pairingMismatch": "skip; never guess",
+    "pairingMismatch": "skip and warn; never guess or swap colors",
     "mutationBoundary": "board.result only",
-    "acknowledgement": "acknowledge pending Web submissions only after successful local save",
-    "targetedCi": {
-      "workflow": "Linux Web Results Download",
-      "runNumber": 5,
-      "runId": 34334839940,
-      "conclusion": "success"
-    }
+    "syncBase": "accepted local result decisions are saved, then unified SYNC must reach In Sync on the same canonical Cloud identity before Web submissions are acknowledged",
+    "acknowledgement": "ACK only after successful unified SYNC/BASE update; failed sync leaves submissions pending for safe retry"
   },
-  "continuity": {
-    "materializer": "scripts/bootstrap_dev21_from_upstream.py",
-    "rule": "materialize immutable dev21 runtime in a separate directory; never substitute the old upstream root protected source; exact protected source is a separate SHA256-pinned package input",
-    "destructiveRepoOverwriteForbidden": true,
-    "oldUpstreamRootSourceAllowed": false,
-    "protectedSourceUnavailableInHostedCi": "fail closed and record protectedSourceVerified=false",
-    "continuityProbe": {
-      "workflow": "Linux Continuity Recovery Probe",
-      "runNumber": 2,
-      "runId": 34359640237,
-      "conclusion": "success"
-    }
+  "preCommitRegression": {
+    "cloudSyncDev23": "PASS - 21 requested contracts",
+    "unifiedSyncContract": "PASS",
+    "webResultsPendingFlow": "PASS",
+    "webResultsReconcile": "PASS",
+    "webResultsStaticSafety": "PASS",
+    "javascriptSyntax": "PASS"
   },
-  "protectedSourceArchive": {
-    "name": "Chess-Publisher-v1.06.00-beta.34-protected-source.tar.gz",
-    "sha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff",
-    "snapshotId": "cp-v1.06.00-beta.34-linux-source-20260907"
-  },
-  "protectedSourceSha256": {
-    "ChessPublisher.html": "f51355b1a449870be6ed69d1bb941c19a9d8d2bdf3c8f91da845b4bc1275f310",
-    "cloud/client/cloud-workspace-api.js": "733b9f921af5f4986c0ef89df62c650d1e621011b40aeeb02f5ba4ba900a1ab5",
-    "hub/client/hub-api-client.js": "5dec709a5eda5969f2f0de0bc3dc3a3467ae4e6fe83fe1362921a63576b93f11",
-    "hub/client/hub-snapshot.js": "d980c520d74a71e66b3a3aa2a54e5ed626ea3618c53159145f9e48b445effac9",
-    "webview/CloudWorkspaceAdapter.js": "a25dba042e46d0f120f9cf721b68fdb70178ab323da902bbcc34c42e6947a602",
-    "webview/HubAdapter.js": "e5d61eb452f8b98e70e874cb5a90da2ab6dfe4669c9da363a5047332c9ae62c0",
-    "webview/WebViewAdapter.js": "d23af37ce1624fac96b46f62c85d7801ed733a66f7e03bab40f453ce4db67861"
-  },
-  "testCandidate": {
+  "lastAcceptedPackage": {
+    "version": "v1.06.00-beta.34-linuxdev22",
     "file": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
-    "package": "chess-publisher",
-    "debVersion": "1.06.00~beta34+linuxdev22",
-    "architecture": "amd64",
-    "bytes": 31814980,
     "sha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a",
-    "appBuild": "1.06.00-beta.34-linux-dev.22",
-    "engineVersion": "0.7.0-linux-dev",
-    "runtimeFiles": 51,
-    "fideSeedFiles": 3,
-    "bytecodeIncluded": false,
-    "exactPackageSelfTest": "PASS - 6 passed, 0 failed",
     "sourceVerified": true,
-    "releaseStatus": "TEST CANDIDATE; user runtime installation/start confirmation still required before promotion"
+    "status": "previous dev22 test candidate; superseded for development by dev23, retained as last accepted package baseline"
   },
   "protectedCore": [
     "Gacrux 1.9.57",
     "Swiss Dutch pairing",
     "TRF16 core",
     "TRF26 core",
+    "TRF pairing path",
     "BBP checker",
     "Tie-Break core/checker",
-    "Chess-Results protocol/core"
+    "Chess-Results protocol/core",
+    "player identity semantics",
+    "pairing identity semantics",
+    "tournament file format"
   ],
-  "next": "User installs and starts the exact linuxdev22 .deb test candidate on Ubuntu. If runtime launch and key Pairings/Download Results checks pass, decide whether to promote without changing protected core."
+  "protectedFilesModifiedByDev23": false,
+  "next": "Run Linux Web Results Download and Linux Full Protected Acceptance on the dev23 commit. If all hosted gates pass, build an exact protected-source dev23 test candidate and perform real Ubuntu runtime/UI confirmation before any stable promotion."
 }

@@ -61,13 +61,14 @@ jobs:
 
       - name: Verify current Linux overlay identity
         run: |
-          grep -F 'linux-dev.22' "$CP_RUNTIME/linux/build_info.py"
+          grep -F 'linux-dev.23' "$CP_RUNTIME/linux/build_info.py"
           grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'apply_cloud_unified_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'Download Results' "$CP_RUNTIME/linux/web_results_download.js"
           grep -F '/arbiter-results/ack' "$CP_RUNTIME/linux/web_results_download.js"
           grep -F '⟳ SYNC' "$CP_RUNTIME/linux/cloud_unified_sync.js"
+          grep -F 'legacyCloudRefreshList' "$CP_RUNTIME/linux/cloud_unified_sync.js"
 
       - name: Compile runtime and Linux modules
         working-directory: ${{ env.CP_RUNTIME }}
@@ -80,6 +81,7 @@ jobs:
           node --check tests/web_results_reconcile_contract.mjs
           node --check tests/web_results_pending_flow_contract.mjs
           node --check tests/cloud_unified_sync_contract.mjs
+          node --check tests/cloud_sync_dev23_regression.mjs
           node --check ci/webview_shim_contract.mjs
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
@@ -95,6 +97,7 @@ jobs:
           node tests/web_results_reconcile_contract.mjs
           node tests/web_results_pending_flow_contract.mjs
           node tests/cloud_unified_sync_contract.mjs
+          node tests/cloud_sync_dev23_regression.mjs
 
       - name: Run protected-source policy and adapter contracts
         working-directory: ${{ env.CP_RUNTIME }}
@@ -169,7 +172,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linux-dev22-full-acceptance-report
+          name: linux-dev23-full-acceptance-report
           path: ${{ env.CP_RUNTIME }}/tests/logs/real-linux-acceptance.json
           if-no-files-found: warn
           retention-days: 90
@@ -178,7 +181,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: chess-publisher-linux-dev22-runtime-only-kit
+          name: chess-publisher-linux-dev23-runtime-only-kit
           path: |
             ${{ env.CP_RUNTIME }}/linux
             ${{ env.CP_RUNTIME }}/packaging

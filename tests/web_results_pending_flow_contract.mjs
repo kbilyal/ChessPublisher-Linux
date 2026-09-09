@@ -14,15 +14,16 @@ const pending=[
   {id:'r4-other-round',round:2,board:1,whiteKey:'A',blackKey:'B',result:'0 - 1',arbiterName:'Arbiter D'},
 ];
 const calls=[];
+const steps=[];
 const alerts=[];
-let confirms=0;
+let choices=0;
 let saves=0;
 const button={disabled:false};
-const tournament={name:'Test',cloud:{cloudTournamentId:'cloud-123',internalId:'internal-123'}};
+const tournament={name:'Test',cloud:{cloudTournamentId:'cloud-123',internalId:'internal-123',baseRevision:9}};
 
 global.window={
   document:{
-    documentElement:{dataset:{chesspublisherVersion:'1.06.00-beta.34-linuxdev22'}},
+    documentElement:{dataset:{chesspublisherVersion:'1.06.00-beta.34-linuxdev23'}},
     getElementById(id){return id==='cpDownloadWebResultsBtn'?button:null},
     querySelector(){return null},
   },
@@ -43,9 +44,12 @@ global.window={
   async fetch(url,init){
     calls.push({url,method:init?.method||'GET',body:init?.body||''});
     if(url.endsWith('/arbiter-results')){
+      steps.push('pending-get');
       return new Response(JSON.stringify({ok:true,results:pending}),{status:200,headers:{'Content-Type':'application/json'}});
     }
     if(url.endsWith('/arbiter-results/ack')){
+      steps.push('ack');
+      assert(steps.includes('sync'),'ACK must happen only after unified SYNC');
       const body=JSON.parse(init.body);
       assert(new Set(body.submissionIds).size===3,'exactly three reviewed submissions must be acknowledged');
       assert(body.submissionIds.includes('r1')&&body.submissionIds.includes('r2')&&body.submissionIds.includes('r3'),'fill/conflict/identical ids acknowledged');
@@ -54,11 +58,18 @@ global.window={
     }
     throw new Error(`unexpected URL ${url}`);
   },
-  async appConfirm(message){
-    confirms++;
-    assert(message.includes('Desktop: 1 - 0')&&message.includes('Web: 0 - 1'),'conflict prompt exposes both results');
-    return false; // explicitly keep Desktop for Board 2
+  async cpChooseWebResultConflict(item){
+    choices++;
+    assert(item.localResult==='1 - 0'&&item.remoteResult==='0 - 1','conflict exposes both results');
+    return 'desktop';
   },
+  async cpUnifiedSync(){
+    steps.push('sync');
+    tournament.cloud.baseRevision=10;
+    return {status:'IN_SYNC',revision:10};
+  },
+  async cpCloudCheckStatus(){return {status:'IN_SYNC',revision:10}},
+  async cpUnifiedSyncRefreshFromResults(){steps.push('refresh')},
   async appAlert(message){alerts.push(message)},
   saveData(){saves++},
   setStatus(){},
@@ -79,12 +90,15 @@ assert(result.pending===3,'only selected-round pending submissions processed');
 assert(result.applied===1,'blank Desktop result filled from Web');
 assert(result.keptDesktop===1,'conflicting Desktop result kept by explicit choice');
 assert(result.acknowledged===3,'all reviewed selected-round submissions acknowledged');
+assert(result.syncStatus==='IN_SYNC','Download Results ends In Sync');
+assert(result.revision===10,'Download Results records post-sync revision/base');
 assert(localBoards[0].result==='1 - 0','Web result applied to blank Desktop board');
 assert(localBoards[1].result==='1 - 0','Desktop conflict choice preserved');
 assert(localBoards[2].result==='½ - ½','identical result unchanged');
-assert(confirms===1,'exactly one conflict prompt');
-assert(saves===1,'result batch saved once before acknowledgement');
-assert(calls.length===2&&calls[0].method==='GET'&&calls[1].method==='POST','pending GET then acknowledgement POST');
+assert(choices===1,'exactly one conflict choice');
+assert(steps.indexOf('sync')<steps.indexOf('ack'),'SYNC precedes ACK');
+assert(tournament.cloud.lastWebResultsSyncAt,'sync timestamp recorded');
+assert(saves>=2,'local result and sync metadata are persisted');
 assert(alerts.at(-1).includes('Acknowledged as reviewed: 3'),'summary reports acknowledgement');
 assert(button.disabled===false,'button re-enabled after completion');
 console.log('WEB_RESULTS_PENDING_FLOW_CONTRACT=PASS');
