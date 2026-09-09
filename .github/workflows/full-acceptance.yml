@@ -33,15 +33,30 @@ jobs:
       - name: Install protected runtime dependency
         run: python -m pip install --disable-pip-version-check 'networkx>=2.6'
 
-      - name: Materialize exact dev21 baseline plus current Linux overlay
+      - name: Materialize dev21 runtime plus current Linux overlay fail-closed
         run: |
-          python scripts/bootstrap_dev21_from_upstream.py --output "$CP_RUNTIME"
+          python scripts/bootstrap_dev21_from_upstream.py \
+            --output "$CP_RUNTIME" \
+            --allow-source-unavailable
           test -f "$CP_RUNTIME/MATERIALIZED_STATE.json"
-          test -f "$CP_RUNTIME/source/ChessPublisher.html"
           test -f "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
           test -f "$CP_RUNTIME/linux/web_results_download.js"
           test -f "$CP_RUNTIME/linux/web_results_download_integration.py"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          state = json.loads((Path(os.environ['CP_RUNTIME']) / 'MATERIALIZED_STATE.json').read_text())
+          assert state['protectedSourceVerified'] is False, state
+          assert state['oldUpstreamRootSourceAllowed'] is False, state
+          assert state['protectedSourceOrigin'] == 'unavailable', state
+          print('HOSTED_PROTECTED_SOURCE_FAIL_CLOSED=PASS')
+          PY
+          if [ -e "$CP_RUNTIME/source/ChessPublisher.html" ]; then
+            echo '::error::Hosted materializer substituted a protected source file unexpectedly.'
+            exit 1
+          fi
+          echo '::notice::Exact protected source is intentionally unavailable to hosted CI. Package-candidate verification requires the SHA256-pinned recovery archive outside this hosted gate.'
 
       - name: Verify dev22 overlay identity
         run: |
@@ -76,7 +91,7 @@ jobs:
           node tests/web_results_reconcile_contract.mjs
           node tests/web_results_pending_flow_contract.mjs
 
-      - name: Run protected source and adapter contracts
+      - name: Run protected-source policy and adapter contracts
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python ci/source_guard_contract.py
@@ -105,7 +120,7 @@ jobs:
           rc=$?
           set -e
           if [ "$rc" -eq 77 ]; then
-            echo "::notice::Exact external source access blocked; pinned local exact-source smoke remains authoritative."
+            echo "::notice::Exact external source access blocked; SHA256-pinned local exact-source smoke remains the package gate."
             exit 0
           fi
           exit "$rc"
@@ -158,11 +173,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
-      - name: Upload verified dev22 runtime kit
+      - name: Upload accepted dev22 runtime-only kit
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: chess-publisher-linux-dev22-runtime-kit
+          name: chess-publisher-linux-dev22-runtime-only-kit
           path: |
             ${{ env.CP_RUNTIME }}/linux
             ${{ env.CP_RUNTIME }}/packaging
