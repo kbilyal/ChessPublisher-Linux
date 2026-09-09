@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "tag": "v1.06.00-beta.81-linux",
+  "releaseName": "Chess-Publisher v1.06.00-beta.81 Linux",
+  "version": "1.06.00-beta.81",
+  "firstManagedLinuxDebRelease": true,
+  "parityAnchorCommit": "7c1af8c1c86881b08a9815da3cde7f2db2c7e0a7",
+  "package": {
+    "name": "Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb",
+    "sha256": "be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc",
+    "architecture": "amd64",
+    "format": "deb"
+  },
+  "authoritativeSharedSource": {
+    "archive": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
+    "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b"
+  },
+  "parity": {
+    "status": "PASS",
+    "matrix": "20/20 PASS",
+    "sharedSource": "574/574 byte-identical",
+    "typeB": "29/29 PASS",
+    "sharedTec": "42 PASS / 0 FAIL",
+    "externalTecDependency": "Q18"
+  },
+  "publishingPolicy": {
+    "binaryInGitHistory": false,
+    "publishAsGitHubReleaseAsset": true,
+    "sha256Required": true,
+    "failClosedOnHashMismatch": true
+  },
+  "status": "REGISTERED_FOR_GITHUB_RELEASE_ASSET_PUBLISHING"
+}
