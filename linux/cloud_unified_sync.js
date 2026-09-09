@@ -35,9 +35,7 @@
         stats.conflicts++;
         if(typeof window.cpCloudPullToDesktop!=='function')throw new Error('Cloud merge engine is unavailable.');
         const pulled=await window.cpCloudPullToDesktop();
-        if(pulled?.conflict&&typeof window.cpCloudResolveConflict==='function'){
-          await window.cpCloudResolveConflict();
-        }
+        if(pulled?.conflict&&typeof window.cpCloudResolveConflict==='function')await window.cpCloudResolveConflict();
         return pulled;
       }
       if(status==='OFFLINE')throw new Error(checked?.error?.message||'Cloud is offline or Organizer Token is not connected.');
@@ -58,9 +56,25 @@
       tournament.cloud.lastSyncStateRefreshAt=new Date().toISOString();
     }
     if(typeof window.cpCloudCheckStatus==='function'){
-      try{return await window.cpCloudCheckStatus({quiet:true});}catch(error){console.warn('SYNC status refresh after Download Results failed:',error);}
+      try{return await window.cpCloudCheckStatus({quiet:true});}
+      catch(error){console.warn('SYNC status refresh after Download Results failed:',error);}
     }
     return null;
+  }
+
+  function installDownloadResultsBridge(){
+    const oldButton=document.getElementById('cpDownloadWebResultsBtn');
+    if(!oldButton||oldButton.dataset.unifiedSyncBridge==='1'||typeof window.cpDownloadWebResults!=='function')return;
+    const button=oldButton.cloneNode(true);
+    button.dataset.unifiedSyncBridge='1';
+    button.addEventListener('click',async()=>{
+      button.disabled=true;
+      try{
+        const result=await window.cpDownloadWebResults();
+        if(result?.ok)await refreshAfterResults();
+      }finally{button.disabled=false;}
+    });
+    oldButton.replaceWith(button);
   }
 
   function hideLegacyUi(){
@@ -79,6 +93,7 @@
 
   function installUi(){
     hideLegacyUi();
+    installDownloadResultsBridge();
     const panel=document.getElementById('cpDirectionalCloudPanel');
     if(!panel)return false;
     const actions=panel.querySelector('.cp-directional-main-actions');
