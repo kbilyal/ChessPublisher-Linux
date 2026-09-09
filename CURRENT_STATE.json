@@ -3,18 +3,35 @@
   "repository": "kbilyal/ChessPublisher-Linux",
   "authoritativeBranch": "main",
   "version": "v1.06.00-beta.34-linuxdev23",
-  "status": "DEVELOPMENT / TEST - unified Cloud SYNC implemented; not final/stable until full protected acceptance and user runtime confirmation",
-  "acceptedBaseline": {
-    "version": "v1.06.00-beta.34-linuxdev22",
-    "runtimeCommit": "eeb30c4cb08ec4dd760b1af800c5d3c56700c557",
+  "status": "HOSTED ACCEPTANCE PASSED / TEST DEVELOPMENT - not final/stable until exact protected-source package and real Ubuntu runtime confirmation",
+  "acceptedHostedRuntime": {
+    "version": "v1.06.00-beta.34-linuxdev23",
+    "runtimeCommit": "39d698a1f6dd3015313d0113540212afb596bc2b",
     "workflow": "Linux Full Protected Acceptance",
-    "runNumber": 17,
-    "runId": 34359612332,
+    "runNumber": 24,
+    "runId": 34373652571,
     "conclusion": "success",
     "artifact": {
-      "name": "chess-publisher-linux-dev22-runtime-only-kit",
-      "id": 10107299648,
-      "digest": "sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac"
+      "name": "chess-publisher-linux-dev23-runtime-only-kit",
+      "id": 10113058905,
+      "digest": "sha256:9cd3f054e1a259902ed54c3a6fb6dd32fa37c8d724b322b13050033f880896e0"
+    },
+    "acceptanceReport": {
+      "name": "linux-dev23-full-acceptance-report",
+      "id": 10113056566,
+      "digest": "sha256:372f08eba086b4c702a6b03d7182e18e8d33da9e5f3b4090a7159d89a41f75fd"
+    }
+  },
+  "targetedHostedGates": {
+    "linuxWebResultsDownload": {
+      "runNumber": 7,
+      "runId": 34373652482,
+      "conclusion": "success"
+    },
+    "linuxRatingLists": {
+      "runNumber": 10,
+      "runId": 34373652481,
+      "conclusion": "success"
     }
   },
   "materialization": {
@@ -49,20 +66,25 @@
     "syncBase": "accepted local result decisions are saved, then unified SYNC must reach In Sync on the same canonical Cloud identity before Web submissions are acknowledged",
     "acknowledgement": "ACK only after successful unified SYNC/BASE update; failed sync leaves submissions pending for safe retry"
   },
-  "preCommitRegression": {
-    "cloudSyncDev23": "PASS - 21 requested contracts",
-    "unifiedSyncContract": "PASS",
-    "webResultsPendingFlow": "PASS",
-    "webResultsReconcile": "PASS",
-    "webResultsStaticSafety": "PASS",
-    "javascriptSyntax": "PASS"
+  "acceptanceResult": {
+    "deterministicSyncContracts": "PASS",
+    "realChromiumUI": "PASS",
+    "fideAndRatingLists": "PASS",
+    "chessResultsAndLocalEngine": "PASS",
+    "ubuntu2404": "PASS",
+    "ubuntu2604": "PASS",
+    "trf16": "PASS",
+    "trf26": "PASS",
+    "gacrux1957": "PASS",
+    "bbp": "PASS",
+    "tieBreak": "PASS"
   },
-  "lastAcceptedPackage": {
+  "lastExactPackage": {
     "version": "v1.06.00-beta.34-linuxdev22",
     "file": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
     "sha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a",
     "sourceVerified": true,
-    "status": "previous dev22 test candidate; superseded for development by dev23, retained as last accepted package baseline"
+    "status": "last exact protected-source package; dev23 exact package has not yet been built"
   },
   "protectedCore": [
     "Gacrux 1.9.57",
@@ -78,5 +100,5 @@
     "tournament file format"
   ],
   "protectedFilesModifiedByDev23": false,
-  "next": "Run Linux Web Results Download and Linux Full Protected Acceptance on the dev23 commit. If all hosted gates pass, build an exact protected-source dev23 test candidate and perform real Ubuntu runtime/UI confirmation before any stable promotion."
+  "next": "Build an exact protected-source dev23 Ubuntu test candidate from accepted runtime commit 39d698a1f6dd3015313d0113540212afb596bc2b, then install/start/test the real app on Ubuntu before any final/stable promotion."
 }

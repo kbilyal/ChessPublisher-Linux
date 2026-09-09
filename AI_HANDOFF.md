@@ -4,8 +4,13 @@ Continue Chess-Publisher Linux only from `kbilyal/ChessPublisher-Linux`, branch 
 
 ## Current development state
 - Version: `v1.06.00-beta.34-linuxdev23`.
-- Status: **DEVELOPMENT / TEST**, not final/stable.
-- The last fully accepted runtime/package baseline remains dev22 until dev23 full protected acceptance and real Ubuntu runtime confirmation pass.
+- Status: **HOSTED ACCEPTANCE PASSED / TEST DEVELOPMENT**, not final/stable.
+- Accepted dev23 runtime commit: `39d698a1f6dd3015313d0113540212afb596bc2b`.
+- Linux Full Protected Acceptance #24, run `34373652571`: **SUCCESS**.
+- Accepted runtime-only artifact: `chess-publisher-linux-dev23-runtime-only-kit`, artifact ID `10113058905`, digest `sha256:9cd3f054e1a259902ed54c3a6fb6dd32fa37c8d724b322b13050033f880896e0`.
+- Targeted Linux Web Results Download #7, run `34373652482`: **SUCCESS**.
+- Targeted Linux Rating Lists #10, run `34373652481`: **SUCCESS**.
+- The last exact protected-source `.deb` is still dev22. Do not call dev23 final/stable until an exact dev23 package is built and the real app is installed/started/tested on Ubuntu.
 - Always inspect the actual current `main` HEAD before writing. Repository state overrides old chat context.
 
 ## Start every new agent/chat here
@@ -45,25 +50,19 @@ Continue Chess-Publisher Linux only from `kbilyal/ChessPublisher-Linux`, branch 
 - Critical ordering: save accepted local result decisions -> unified SYNC on the same canonical Cloud identity -> verify `In Sync` -> ACK pending Web submissions.
 - If SYNC fails/conflicts/offline, local changes may remain saved but Web submissions must remain pending for retry.
 
-## dev23 tests
-Targeted pre-commit checks added/passing before branch write:
-- 21-point `cloud_sync_dev23_regression.mjs` contract.
-- unified SYNC contract.
-- Web results reconcile contract.
-- pending Web results flow contract.
-- result-only static safety contract.
-- JavaScript syntax checks.
+## dev23 accepted hosted gates
+Linux Full Protected Acceptance #24 passed all required hosted stages:
+- materialization / source-policy contracts;
+- deterministic Linux integration contracts including the 21 requested sync/result cases;
+- real Chromium UI;
+- FIDE and integrated Rating Lists;
+- Chess-Results and LocalEngine;
+- Ubuntu 24.04 install/self-test;
+- Ubuntu 26.04 install/self-test;
+- TRF16 / TRF26;
+- Gacrux 1.9.57 / BBP / Tie-Break.
 
-After the commit, inspect both GitHub workflows:
-- `Linux Web Results Download`.
-- `Linux Full Protected Acceptance`.
-Do not call dev23 accepted until the relevant GitHub runs pass.
-
-## Last accepted dev22 baseline
-- Runtime commit: `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
-- Linux Full Protected Acceptance #17 / run `34359612332`: SUCCESS.
-- Runtime-only artifact: `chess-publisher-linux-dev22-runtime-only-kit`, artifact ID `10107299648`, digest `sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac`.
-- Last exact package: `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`, SHA256 `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`.
+Acceptance report artifact: `linux-dev23-full-acceptance-report`, ID `10113056566`, digest `sha256:372f08eba086b4c702a6b03d7182e18e8d33da9e5f3b4090a7159d89a41f75fd`.
 
 ## Protected-source/materialization rule
 The upstream Git root does not contain the exact protected source used by the accepted Linux package. Never substitute the old root `ChessPublisher.html`.
@@ -71,6 +70,12 @@ The upstream Git root does not contain the exact protected source used by the ac
 - Protected snapshot: `cp-v1.06.00-beta.34-linux-source-20260907`.
 - Protected recovery archive SHA256: `19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff`.
 - Hosted CI may materialize runtime-only with `protectedSourceVerified=false`; exact package candidates require verified protected source.
+
+## Last exact package baseline
+- Version: `v1.06.00-beta.34-linuxdev22`.
+- File: `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`.
+- SHA256: `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`.
+- This remains the last exact protected-source package until dev23 is packaged.
 
 ## Protected components — do not modify without explicit approval
 - Gacrux 1.9.57.
@@ -86,4 +91,4 @@ The upstream Git root does not contain the exact protected source used by the ac
 Every completed Linux fix must be committed and pushed to `ChessPublisher-Linux/main`. No force push. Re-read HEAD before branch update and never overwrite a concurrent commit.
 
 ## Next gate
-Run and inspect dev23 hosted workflows. If full protected acceptance passes, build an exact protected-source dev23 test candidate, then install/start/test it on Ubuntu before any final/stable promotion.
+Build an exact protected-source dev23 Ubuntu test candidate from accepted runtime commit `39d698a1f6dd3015313d0113540212afb596bc2b`. Then install/start/test the real app on Ubuntu before any final/stable promotion.
