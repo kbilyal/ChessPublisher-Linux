@@ -50,6 +50,7 @@ jobs:
           grep -F 'LINUX_DEV22_SERVER_ATOMIC_UPDATE' "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
           grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'Download Results' "$CP_RUNTIME/linux/web_results_download.js"
+          grep -F '/arbiter-results/ack' "$CP_RUNTIME/linux/web_results_download.js"
 
       - name: Compile runtime and dev22 modules
         working-directory: ${{ env.CP_RUNTIME }}
@@ -59,6 +60,7 @@ jobs:
           node --check linux/export_integration.js
           node --check linux/web_results_download.js
           node --check tests/web_results_reconcile_contract.mjs
+          node --check tests/web_results_pending_flow_contract.mjs
           node --check ci/webview_shim_contract.mjs
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
@@ -72,6 +74,7 @@ jobs:
           python tests/test_materialize_script.py
           python tests/test_web_results_download.py
           node tests/web_results_reconcile_contract.mjs
+          node tests/web_results_pending_flow_contract.mjs
 
       - name: Run protected source and adapter contracts
         working-directory: ${{ env.CP_RUNTIME }}
