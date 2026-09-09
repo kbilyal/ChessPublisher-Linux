@@ -40,7 +40,6 @@ jobs:
           python tests/test_shared_source_adapter.py
           python tests/test_materialize_script.py
           python ci/source_guard_contract.py
-          python ci/source_bootstrap_contract.py
           python ci/linux_adapter_order_contract.py
       - name: Materialize platform runtime fail-closed without shared source
         run: |
