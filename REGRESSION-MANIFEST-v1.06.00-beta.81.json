@@ -1,8 +1,8 @@
 {
   "version": "v1.06.00-beta.81",
-  "status": "PASS - CROSS-PLATFORM PARITY ANCHOR",
+  "status": "PASS - CROSS-PLATFORM PARITY + EXACT-SOURCE PACKAGE CANDIDATE",
   "date": "2026-09-09",
-  "releaseCandidate": false,
+  "releaseCandidate": true,
   "authoritativeSource": {
     "archive": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
     "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
@@ -74,6 +74,19 @@
     "needsTest": 0,
     "methodology": "Exact authoritative Windows beta.81 shared-source regressions + byte-identical Linux shared source + deterministic storage/identity tests + native Linux acceptance. Native Windows executable not run inside Linux CI."
   },
+  "packageCandidate": {
+    "file": "Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb",
+    "sha256": "be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc",
+    "bytes": 32238004,
+    "packageVersion": "1.06.00~beta81",
+    "sourceSnapshot": "cp-v1.06.00-beta.81-shared-source-20260909",
+    "sourcePayloadFiles": 574,
+    "sourcePayloadDifferences": 0,
+    "selfTest": "6 PASS / 0 FAIL",
+    "startSmoke": "PASS",
+    "healthAppBuild": "1.06.00-beta.81",
+    "sourceVersionRoute": "1.06.00-beta.81"
+  },
   "windowsVclEvidence": {
     "pass": 159,
     "partial": 14,
@@ -83,5 +96,5 @@
     "needsTec": 1,
     "notApplicable": 30
   },
-  "next": "Build exact-source Linux beta.81 parity package candidate as an anchor; do not start beta.82. Migrate next to exact beta.83 source when authoritative hashes are available."
+  "next": "Freeze beta.81 as the cross-platform parity/package anchor. Do not start Linux beta.82. Migrate next to exact Windows beta.83 source when authoritative source and hashes are available."
 }
