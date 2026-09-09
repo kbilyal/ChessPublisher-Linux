@@ -1,0 +1,64 @@
+{
+  "versionTarget": "v1.06.00-beta.81",
+  "scope": "Windows/Linux parity baseline and fail-closed source/version gate",
+  "status": "PASS FOR AUDIT/GUARD ONLY - BETA.81 PARITY NOT YET PROVEN",
+  "commitUnderTest": "064cdccad0618917f008edea1d60fa4767f584c3",
+  "gates": {
+    "crossPlatformParityGuard": {
+      "runNumber": 1,
+      "runId": 34379949705,
+      "conclusion": "success",
+      "meaning": "Shared target is beta.81 and release promotion is correctly blocked while protected/shared source remains beta.34"
+    },
+    "linuxRollbackFullProtectedAcceptance": {
+      "runNumber": 25,
+      "runId": 34379949724,
+      "conclusion": "success",
+      "meaning": "The existing dev23 Linux rollback/runtime baseline remains regression-clean after parity metadata/guard additions; this is NOT proof of beta.81 functional parity",
+      "covered": [
+        "deterministic Linux integration contracts",
+        "protected-source policy and adapter contracts",
+        "real Chromium UI",
+        "FIDE and integrated rating lists",
+        "Chess-Results and LocalEngine",
+        "Ubuntu 24.04 and Ubuntu 26.04 package self-test",
+        "TRF16/TRF26",
+        "Gacrux 1.9.57",
+        "BBP",
+        "Tie-Break"
+      ],
+      "artifacts": {
+        "runtimeOnlyKit": {
+          "id": 10115525605,
+          "name": "chess-publisher-linux-dev23-runtime-only-kit",
+          "sha256": "f5244dda0c6917b040f3d63ec390cdae33e01817bb3afc59e8372388f3440018"
+        },
+        "acceptanceReport": {
+          "id": 10115523823,
+          "name": "linux-dev23-full-acceptance-report",
+          "sha256": "45c2defa6cb072201efdc1b0d11843d2d51db2ad05a2fcc86adeffb829eb637c"
+        }
+      }
+    }
+  },
+  "protectedSource": {
+    "currentLinuxBase": "v1.06.00-beta.34",
+    "targetSharedBase": "v1.06.00-beta.81",
+    "beta81SourceRecovered": false,
+    "releaseCandidateAllowed": false
+  },
+  "vcl": {
+    "windowsBeta81": {
+      "pass": 159,
+      "partial": 14,
+      "fail": 0,
+      "conditional": 21,
+      "needsTest": 0,
+      "needsTec": 1,
+      "notApplicable": 30
+    },
+    "linuxParity": "NEEDS ALIGNMENT/TEST; Windows PASS labels are not inherited",
+    "externalTecDependency": "Q18"
+  },
+  "nextGate": "Recover and hash-verify exact beta.81 shared source, integrate Linux adapters against it, then execute the 20-point cross-platform matrix and row-by-row TEC/VCL parity evidence."
+}

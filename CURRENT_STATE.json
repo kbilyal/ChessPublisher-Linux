@@ -61,6 +61,24 @@
       "cross-platform file/Cloud/TEC regression matrix"
     ]
   },
+  "parityGuardEvidence": {
+    "commit": "064cdccad0618917f008edea1d60fa4767f584c3",
+    "crossPlatformParityGuard": {
+      "runNumber": 1,
+      "runId": 34379949705,
+      "conclusion": "success"
+    },
+    "linuxRollbackFullProtectedAcceptance": {
+      "runNumber": 25,
+      "runId": 34379949724,
+      "conclusion": "success",
+      "runtimeArtifactId": 10115525605,
+      "runtimeArtifactSha256": "f5244dda0c6917b040f3d63ec390cdae33e01817bb3afc59e8372388f3440018",
+      "reportArtifactId": 10115523823,
+      "reportArtifactSha256": "45c2defa6cb072201efdc1b0d11843d2d51db2ad05a2fcc86adeffb829eb637c",
+      "note": "This proves rollback baseline regression safety only, not beta.81 functional parity."
+    }
+  },
   "references": {
     "vcl": "VCL4THP.13.xlsx",
     "tecManual": "TEC Manual 30HdT.docx",
@@ -68,7 +86,8 @@
     "tecStatus": "TEC-VCL-STATUS.md",
     "checkpoint": "CHECKPOINTS/beta81-parity-baseline.md",
     "sourceCheckpoint": "SOURCE-CHECKPOINT.md",
-    "sharedVersion": "VERSION.txt"
+    "sharedVersion": "VERSION.txt",
+    "regressionManifest": "REGRESSION-MANIFEST-v1.06.00-beta.81.json"
   },
   "protectedCoreRule": "Any unexpected protected-core hash change requires STOP and investigation. Do not fork business/tournament logic for Linux.",
   "versionRule": "Do not continue independent linuxdev numbering after parity. Do not start beta.82 feature work before beta.81 parity gate.",
