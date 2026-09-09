@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "version": "1.06.00-beta.81",
+  "referenceFirstDeb": {
+    "filename": "Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb",
+    "sha256": "be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc",
+    "bytes": 32238004
+  },
+  "linuxSourceCommit": "30c6b924e11b9ebcd1ef2337761640c02cc1e580",
+  "windowsSourceCommit": "93f5474bd161057af0dec130d51663d10be004f7",
+  "sourceSnapshot": "cp-v1.06.00-beta.81-shared-source-20260909",
+  "sourceArchiveSha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
+  "sourceManifestSha256": "449b0e213d57f77718dd88ddaab43f5619264d4f5ab5565c49eb8ebcc748ee11",
+  "appBuild": "1.06.00-beta.81",
+  "engineVersion": "0.7.0-linux",
+  "packageVersion": "1.06.00~beta81",
+  "runtimeIdentity": {
+    "source_guard.py": "07e7bb64ba1450505e46e452af829042a664f1e3c1b7b125033657fe81b1de1b",
+    "build_info.py": "ae33a643f14ebf6494798c30f82d465ba96a10bf3237b8474fa0bbc7ac312a3f",
+    "beta81_shared_source_integration.py": "ec4de757a83e1b16d5498d637c27328afa86bf8327434a4b51c30f9037e539b2",
+    "chess_publisher_linux_entry.py": "1cd1e6bc4adaaf7d535c61cad53437e6696ae9fee61f3d3c44a169cf1a3d9bcb",
+    "cloud_unified_sync.js": "f4bf999bf0fbd52bab6ee093735ed1652f2b0c1f965e0598f6ee3df96886e637",
+    "web_results_download.js": "2ed368c443750b77f904aeb648ce45625e1fee8c51786a2a463a7ed42961cf74"
+  },
+  "fideSeedIdentity": {
+    "standard_rating_list.zip": "d7f0e47e365611680325651227ca1204db73d5e9753354f62499d5a3207e38c2",
+    "rapid_rating_list.zip": "4ae38ba79e4068dc2f5589e735a70a8d5e23019180946e7d639aa62ee7400252",
+    "blitz_rating_list.zip": "bedb91d91018e5af90740cabb17267ba65364f05eff8cc185c52367f1581cdb3"
+  },
+  "note": "The reference SHA is the exact first locally produced .deb. A GitHub rebuild from the same pinned payload may have a different outer .deb SHA because dpkg-deb/tar timestamps are build metadata; payload/source identity must remain exact."
+}
