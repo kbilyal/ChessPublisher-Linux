@@ -12,20 +12,53 @@
 - Chess-Results secure Worker contract PASS.
 - Gacrux 1.9.57 / BBP / Tie-Break PASS.
 
-## v1.06.00-beta.34-linuxdev22 — in progress
+## v1.06.00-beta.34-linuxdev22 — TEST CANDIDATE
 - Dedicated `kbilyal/ChessPublisher-Linux` repository established as Linux source of truth.
 - Added integrated FIDE Standard/Rapid/Blitz local reference database.
 - Added generation-based SQLite index with exact FIDE-ID lookup.
 - Added Unicode NFKD case/accent/punctuation-normalized name search.
-- Added atomic three-list activation; any failed download/parse/index keeps the previous complete generation.
+- Added atomic three-list activation; failed download/parse/index keeps the previous complete generation.
 - Added persistent update metadata/checksums and human-readable last successful update report.
 - Rating-list update explicitly does **not** mutate tournament players.
 - Added Linux UI adapter: Standard/Rapid/Blitz cards, `Update Rating Lists`, `View Last Update Report`, `Review Player Updates`.
-- Linux search now uses the integrated LocalEngine database first instead of scanning/rebuilding the giant browser FIDE map.
+- Linux search uses the integrated LocalEngine database first instead of scanning/rebuilding the giant browser FIDE map.
 - Manual/offline rating-list import remains available as fallback.
 - Added `/fide/rating-lists/status` and `/fide/rating-lists/report` LocalEngine endpoints.
-- Made dev21 runtime materialization non-destructive: immutable baseline is created in a separate runtime folder, protected source is verified, then current repo deltas are overlaid.
-- Linux Rating Lists CI #1 PASS: parser/store/search/atomic rollback.
-- Linux Rating Lists CI #2 PASS: UI/status/report/server-search contracts.
-- Linux Rating Lists CI #3 PASS: continuity/materializer contract.
-- Full protected Linux acceptance is still pending; dev22 is not yet a release/test candidate.
+- Added Pairings `Download Results` for pending Arbiter Access Web results.
+  - Current editable round only.
+  - Exact `whiteKey + blackKey` board identity; pairing differences are skipped, never guessed.
+  - Empty Desktop result + Web result: Web result is applied automatically.
+  - Same result: no change.
+  - Different populated Desktop/Web results: organizer chooses which result remains.
+  - Empty Web result never erases a Desktop result.
+  - Only `board.result` is mutated; pairings, colors, players and starting numbers are untouched.
+  - Web submissions are acknowledged only after successful local save; acknowledgement failure keeps the Web submission available for retry.
+- `Download Results` targeted CI #5 (`34334839940`) SUCCESS.
+- Reworked dev21 continuity materialization to fail closed:
+  - old upstream root protected source is forbidden;
+  - hosted CI may materialize runtime-only with `protectedSourceVerified=false`;
+  - exact package builds require the SHA256-pinned protected source archive.
+- Continuity Recovery Probe #2 (`34359640237`) SUCCESS.
+- Full dev22 hosted runtime acceptance #17 (`34359612332`) SUCCESS at runtime commit `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
+  - dev22 deterministic contracts PASS.
+  - adapter/source-policy contracts PASS.
+  - Chromium UI gates PASS.
+  - FIDE + integrated Rating Lists PASS.
+  - Chess-Results + LocalEngine PASS.
+  - Ubuntu 24.04 and Ubuntu 26.04 install/self-test PASS.
+  - TRF16/TRF26 PASS.
+  - Gacrux 1.9.57 / BBP / Tie-Break PASS.
+- Accepted runtime-only artifact:
+  - `chess-publisher-linux-dev22-runtime-only-kit`
+  - artifact ID `10107299648`
+  - digest `sha256:5752152277a5f91cad6887e8894037c39846d7521a0c0f337e0a62b308a568ac`
+- Exact protected-source package gate PASS using snapshot `cp-v1.06.00-beta.34-linux-source-20260907`.
+- Exact package self-test PASS: 6 passed, 0 failed.
+- Test candidate:
+  - `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`
+  - 31,814,980 bytes
+  - SHA256 `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`
+  - package version `1.06.00~beta34+linuxdev22`
+  - app build `1.06.00-beta.34-linux-dev.22`
+  - engine `0.7.0-linux-dev`
+- This is a **TEST CANDIDATE**, not yet promoted to final/stable. User installation/start confirmation remains the final runtime gate before promotion.
