@@ -1,94 +1,69 @@
 # AI HANDOFF — READ THIS FIRST
 
-Continue Chess-Publisher Linux only from `kbilyal/ChessPublisher-Linux`, branch `main`.
+Continue Chess-Publisher as ONE Windows/Linux product. Linux code changes remain in `kbilyal/ChessPublisher-Linux`, branch `main`, until repository consolidation is explicitly approved.
 
-## Current development state
-- Version: `v1.06.00-beta.34-linuxdev23`.
-- Status: **HOSTED ACCEPTANCE PASSED / TEST DEVELOPMENT**, not final/stable.
-- Accepted dev23 runtime commit: `39d698a1f6dd3015313d0113540212afb596bc2b`.
-- Linux Full Protected Acceptance #24, run `34373652571`: **SUCCESS**.
-- Accepted runtime-only artifact: `chess-publisher-linux-dev23-runtime-only-kit`, artifact ID `10113058905`, digest `sha256:9cd3f054e1a259902ed54c3a6fb6dd32fa37c8d724b322b13050033f880896e0`.
-- Targeted Linux Web Results Download #7, run `34373652482`: **SUCCESS**.
-- Targeted Linux Rating Lists #10, run `34373652481`: **SUCCESS**.
-- The last exact protected-source `.deb` is still dev22. Do not call dev23 final/stable until an exact dev23 package is built and the real app is installed/started/tested on Ubuntu.
-- Always inspect the actual current `main` HEAD before writing. Repository state overrides old chat context.
+## Current directive — supersedes old standalone Linux release path
+Windows and Linux must now move in version lockstep from one logical shared tournament/business source baseline. Do not continue a separate `linuxdev24/linuxdev25` product line. Do not start beta.82 feature work until Linux parity against Windows `v1.06.00-beta.81` is measured and restored.
 
-## Start every new agent/chat here
-1. Read `CURRENT_STATE.json`.
-2. Read `AI_HANDOFF.md`.
-3. Read `CHANGELOG-LINUX.md`.
-4. Read `docs/PROTECTED_COMPONENTS.md`.
-5. Inspect current `main` HEAD and recent commits.
-6. Materialize only through `scripts/bootstrap_dev21_from_upstream.py`.
+## Current observed baselines
+### Windows reference
+- Version: `v1.06.00-beta.81`.
+- Repo: `kbilyal/Chess-Publisher-Windows-FIDE-Beta`.
+- HEAD observed at parity audit: `93f5474bd161057af0dec130d51663d10be004f7`.
+- beta.81 Type-B checkpoint: `fc0672079e4e6d14106cb7844d855c9abcbb73c6`.
+- VCL evidence: PASS 159 / PARTIAL 14 / FAIL 0 / CONDITIONAL 21 / NEEDS TEST 0 / NEEDS TEC 1 / N/A 30.
+- Q18 remains external TEC; never mark it PASS locally.
 
-## dev23 Cloud synchronization
-- Normal Linux Cloud control is one `SYNC` button.
-- Do not restore separate normal `Upload Current`, `Pull Current` or `Upload as New` workflows.
-- Do not introduce a second tournament identity model.
-- Canonical identity remains the existing directional model: `cloud.internalId` / Cloud `localKey` plus `cloud.cloudTournamentId` after linking.
-- Identity must never depend on name, filename, `Imported`, revision or where the tournament was created.
-- The existing directional engine owns BASE/LOCAL/REMOTE using `baseRevision`, historical Cloud revision and content fingerprints.
-- `SYNC` behavior:
-  - LOCAL only -> push;
-  - REMOTE only -> pull;
-  - same -> In Sync;
-  - non-overlapping two-sided changes -> field merge then push in the same SYNC;
-  - same-field divergence -> explicit Keep Desktop / Keep Cloud conflict resolution; never silently choose.
-- `Refresh` is not SYNC. It refreshes My Online Tournaments/list metadata and Cloud status only; it must not push, pull, change current tournament or resolve conflicts.
-- Autosave remains local-only.
-- `Public List` is not part of the normal Linux Cloud UI.
+### Linux rollback baseline
+- Legacy version label: `v1.06.00-beta.34-linuxdev23`.
+- Accepted runtime commit: `39d698a1f6dd3015313d0113540212afb596bc2b`.
+- Hosted full acceptance #24: PASS.
+- Existing protected source snapshot: `cp-v1.06.00-beta.34-linux-source-20260907`.
+- Current Linux source lineage is therefore NOT beta.81 parity yet.
 
-## dev23 Download Results
-- `Download Results` remains in Pairings and is results-only.
-- Selected editable round only.
-- Exact board number + `whiteKey` + `blackKey`; do not infer, swap colors or remap pairings.
-- Blank Desktop + Web result -> Web may fill.
-- Same -> no board change.
-- Different populated results -> explicit `Keep Desktop` / `Use Web` buttons.
-- Blank Web never erases Desktop.
-- Mutation boundary is **only** `board.result`.
-- Critical ordering: save accepted local result decisions -> unified SYNC on the same canonical Cloud identity -> verify `In Sync` -> ACK pending Web submissions.
-- If SYNC fails/conflicts/offline, local changes may remain saved but Web submissions must remain pending for retry.
+## Read first
+1. `CURRENT_STATE.json`
+2. `CROSS-PLATFORM-PARITY.md`
+3. `TEC-VCL-STATUS.md`
+4. `CHECKPOINTS/beta81-parity-baseline.md`
+5. `docs/PROTECTED_COMPONENTS.md`
+6. actual current `main` HEAD and recent commits
 
-## dev23 accepted hosted gates
-Linux Full Protected Acceptance #24 passed all required hosted stages:
-- materialization / source-policy contracts;
-- deterministic Linux integration contracts including the 21 requested sync/result cases;
-- real Chromium UI;
-- FIDE and integrated Rating Lists;
-- Chess-Results and LocalEngine;
-- Ubuntu 24.04 install/self-test;
-- Ubuntu 26.04 install/self-test;
-- TRF16 / TRF26;
-- Gacrux 1.9.57 / BBP / Tie-Break.
+## Shared protected/business logic
+Do not create Linux-specific versions of:
+- Gacrux 1.9.57 / Swiss Dutch pairing logic
+- TRF16/TRF26 core and TRF pairing path
+- BBP
+- Tie-Break core/checker
+- Chess-Results protocol/core
+- player/pairing identity semantics
+- rating-list semantics
+- TEC/FIDE warning logic
+- tournament file format
+- Cloud tournament identity / unified SYNC contract
 
-Acceptance report artifact: `linux-dev23-full-acceptance-report`, ID `10113056566`, digest `sha256:372f08eba086b4c702a6b03d7182e18e8d33da9e5f3b4090a7159d89a41f75fd`.
+Platform-specific code is limited to launcher/runtime, browser/WebView shell, filesystem/dialogs, printing/PDF integration, hardware bridge and installers/packages.
 
-## Protected-source/materialization rule
-The upstream Git root does not contain the exact protected source used by the accepted Linux package. Never substitute the old root `ChessPublisher.html`.
-- Immutable source baseline: `kbilyal/ChessPublisher@5e0b37708cbef2828ec60d7e6faa247d4ecc904d`.
-- Protected snapshot: `cp-v1.06.00-beta.34-linux-source-20260907`.
-- Protected recovery archive SHA256: `19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff`.
-- Hosted CI may materialize runtime-only with `protectedSourceVerified=false`; exact package candidates require verified protected source.
+## Linux features already accepted
+- Ubuntu runtime/hosted acceptance.
+- integrated Standard/Rapid/Blitz local rating-list database and safe atomic update.
+- Web result-only reconciliation with exact board/player identity and explicit conflict choice.
+- unified Cloud SYNC with stable identity, BASE/LOCAL/REMOTE classification and fail-closed conflicts.
+- Refresh is metadata/status only; autosave is local only.
+- Gacrux/TRF/BBP/Tie-Break/Chess-Results hosted regression passed for the dev23 rollback baseline.
 
-## Last exact package baseline
-- Version: `v1.06.00-beta.34-linuxdev22`.
-- File: `Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb`.
-- SHA256: `c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a`.
-- This remains the last exact protected-source package until dev23 is packaged.
+## Known parity gaps / evidence gaps
+See `CROSS-PLATFORM-PARITY.md`. The critical architectural gap is that Linux still materializes beta.34 protected/shared source while Windows has beta.35-beta.81 shared compliance work. Do NOT copy Windows PASS labels into Linux. Establish shared beta.81 source first.
 
-## Protected components — do not modify without explicit approval
-- Gacrux 1.9.57.
-- Swiss Dutch pairing.
-- TRF16/TRF26 core and TRF pairing path.
-- BBP checker.
-- Tie-Break core/checker.
-- Chess-Results protocol/core.
-- Player/pairing identity semantics.
-- Tournament file format.
+Two immediately visible UX/feature gaps:
+- Windows Pairings normal action is `↕ SYNC` (validated Web result intake followed by unified SYNC); Linux dev23 still exposes `Download Results` separately.
+- Windows beta.81 Type-B Rating Lists (Q120/Q122) are not present/proven in current Linux rating-list store/UI.
+
+## TEC/VCL references
+Use `VCL4THP.13.xlsx` and `TEC Manual 30HdT.docx` as primary working TEC/VCL references. The FIDE Handbook takes precedence if it conflicts with the TEC Manual.
 
 ## Git rule
-Every completed Linux fix must be committed and pushed to `ChessPublisher-Linux/main`. No force push. Re-read HEAD before branch update and never overwrite a concurrent commit.
+Before every write, re-read `main` HEAD. Every completed logical block: TEST -> REGRESSION -> COMMIT -> PUSH -> verify remote HEAD -> record SHA. Never force push.
 
-## Next gate
-Build an exact protected-source dev23 Ubuntu test candidate from accepted runtime commit `39d698a1f6dd3015313d0113540212afb596bc2b`. Then install/start/test the real app on Ubuntu before any final/stable promotion.
+## Next logical block
+Recover/materialize exact Windows beta.81 shared source (or exact canonical additive source modules) as the Linux shared input, preserving the accepted Linux platform adapters. Then run protected hashes and targeted regression before any functional parity modification or beta.81 Linux candidate label.

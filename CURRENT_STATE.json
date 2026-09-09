@@ -1,104 +1,65 @@
 {
-  "project": "Chess-Publisher Linux",
-  "repository": "kbilyal/ChessPublisher-Linux",
+  "project": "Chess-Publisher",
+  "linuxRepository": "kbilyal/ChessPublisher-Linux",
   "authoritativeBranch": "main",
-  "version": "v1.06.00-beta.34-linuxdev23",
-  "status": "HOSTED ACCEPTANCE PASSED / TEST DEVELOPMENT - not final/stable until exact protected-source package and real Ubuntu runtime confirmation",
-  "acceptedHostedRuntime": {
-    "version": "v1.06.00-beta.34-linuxdev23",
-    "runtimeCommit": "39d698a1f6dd3015313d0113540212afb596bc2b",
-    "workflow": "Linux Full Protected Acceptance",
-    "runNumber": 24,
-    "runId": 34373652571,
-    "conclusion": "success",
-    "artifact": {
-      "name": "chess-publisher-linux-dev23-runtime-only-kit",
-      "id": 10113058905,
-      "digest": "sha256:9cd3f054e1a259902ed54c3a6fb6dd32fa37c8d724b322b13050033f880896e0"
-    },
-    "acceptanceReport": {
-      "name": "linux-dev23-full-acceptance-report",
-      "id": 10113056566,
-      "digest": "sha256:372f08eba086b4c702a6b03d7182e18e8d33da9e5f3b4090a7159d89a41f75fd"
+  "developmentModel": "ONE shared Chess-Publisher core, Windows and Linux version lockstep",
+  "targetSharedVersion": "v1.06.00-beta.81",
+  "status": "BETA.81 CROSS-PLATFORM PARITY WORK IN PROGRESS - NOT A RELEASE CANDIDATE",
+  "windowsReference": {
+    "repository": "kbilyal/Chess-Publisher-Windows-FIDE-Beta",
+    "version": "v1.06.00-beta.81",
+    "headObservedAtAudit": "93f5474bd161057af0dec130d51663d10be004f7",
+    "typeBCheckpoint": "fc0672079e4e6d14106cb7844d855c9abcbb73c6",
+    "vcl": {
+      "pass": 159,
+      "partial": 14,
+      "fail": 0,
+      "conditional": 21,
+      "needsTest": 0,
+      "needsTec": 1,
+      "notApplicable": 30,
+      "externalTecRow": "Q18"
     }
   },
-  "targetedHostedGates": {
-    "linuxWebResultsDownload": {
-      "runNumber": 7,
-      "runId": 34373652482,
-      "conclusion": "success"
-    },
-    "linuxRatingLists": {
-      "runNumber": 10,
-      "runId": 34373652481,
-      "conclusion": "success"
-    }
-  },
-  "materialization": {
-    "sourceProject": "kbilyal/ChessPublisher",
-    "sourceCommit": "5e0b37708cbef2828ec60d7e6faa247d4ecc904d",
-    "script": "scripts/bootstrap_dev21_from_upstream.py",
-    "oldUpstreamRootProtectedSourceAllowed": false,
+  "linuxRollbackBaseline": {
+    "legacyVersion": "v1.06.00-beta.34-linuxdev23",
+    "preParityHead": "d86d9f92661dbfd64080c42b6e47b8856fe51159",
+    "acceptedRuntimeCommit": "39d698a1f6dd3015313d0113540212afb596bc2b",
+    "hostedAcceptanceRun": 34373652571,
+    "hostedAcceptance": "PASS",
     "protectedSourceSnapshot": "cp-v1.06.00-beta.34-linux-source-20260907",
-    "protectedSourceArchive": "Chess-Publisher-v1.06.00-beta.34-protected-source.tar.gz",
-    "protectedSourceArchiveSha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff"
+    "protectedSourceArchiveSha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff",
+    "lastExactPackage": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
+    "lastExactPackageSha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a"
   },
-  "cloudSyncDev23": {
-    "ui": "single SYNC control plus Refresh; Upload Current, Pull Current, Upload as New and Public List are removed from normal Linux UI",
-    "identity": "delegates to the existing canonical directional layer: stable cloud.internalId/localKey and cloud.cloudTournamentId; never tournament name, filename, Imported state or revision",
-    "base": "existing directional layer uses baseRevision plus content fingerprint and historical Cloud revision as BASE",
-    "threeWay": "BASE/LOCAL/REMOTE; local-only push; remote-only pull; no-change In Sync; non-overlapping conflict merges then pushes in the same SYNC; same-field conflict requires explicit Keep Desktop/Keep Cloud choice",
-    "refresh": "reuses the existing cpCloudRefreshList for My Online Tournaments metadata and performs status check only; no hidden push/pull/conflict resolution",
-    "autosave": "local only; no automatic Cloud push"
+  "parityAudit": {
+    "conclusion": "NOT YET PROVEN",
+    "rootGap": "Linux shared/protected source lineage is beta.34 while Windows reference is beta.81",
+    "alreadyAligned": [
+      "Gacrux 1.9.57 hosted baseline",
+      "Swiss/TRF16/TRF26/BBP/Tie-Break/Chess-Results hosted baseline",
+      "integrated official Standard/Rapid/Blitz local rating data",
+      "result-only Web reconciliation safety",
+      "stable-identity unified Cloud SYNC"
+    ],
+    "priorityGaps": [
+      "recover/materialize exact beta.81 shared source",
+      "prove beta.35-beta.70 TEC/VCL shared compliance on Linux",
+      "historical rating policies Q214-Q216",
+      "Pairings unified SYNC UX composition",
+      "Type-B Rating Lists Q120/Q122",
+      "cross-platform file/Cloud/TEC regression matrix"
+    ]
   },
-  "downloadResultsDev23": {
-    "location": "Pairings toolbar",
-    "label": "Download Results",
-    "source": "pending Arbiter Access Web result queue",
-    "scope": "selected editable round only",
-    "matching": "exact board number + whiteKey + blackKey pairing identity",
-    "blankDesktop": "apply Web result automatically",
-    "sameResult": "no board change",
-    "conflict": "explicit Keep Desktop / Use Web buttons",
-    "blankWeb": "never erase Desktop result",
-    "pairingMismatch": "skip and warn; never guess or swap colors",
-    "mutationBoundary": "board.result only",
-    "syncBase": "accepted local result decisions are saved, then unified SYNC must reach In Sync on the same canonical Cloud identity before Web submissions are acknowledged",
-    "acknowledgement": "ACK only after successful unified SYNC/BASE update; failed sync leaves submissions pending for safe retry"
+  "references": {
+    "vcl": "VCL4THP.13.xlsx",
+    "tecManual": "TEC Manual 30HdT.docx",
+    "parityReport": "CROSS-PLATFORM-PARITY.md",
+    "tecStatus": "TEC-VCL-STATUS.md",
+    "checkpoint": "CHECKPOINTS/beta81-parity-baseline.md"
   },
-  "acceptanceResult": {
-    "deterministicSyncContracts": "PASS",
-    "realChromiumUI": "PASS",
-    "fideAndRatingLists": "PASS",
-    "chessResultsAndLocalEngine": "PASS",
-    "ubuntu2404": "PASS",
-    "ubuntu2604": "PASS",
-    "trf16": "PASS",
-    "trf26": "PASS",
-    "gacrux1957": "PASS",
-    "bbp": "PASS",
-    "tieBreak": "PASS"
-  },
-  "lastExactPackage": {
-    "version": "v1.06.00-beta.34-linuxdev22",
-    "file": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
-    "sha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a",
-    "sourceVerified": true,
-    "status": "last exact protected-source package; dev23 exact package has not yet been built"
-  },
-  "protectedCore": [
-    "Gacrux 1.9.57",
-    "Swiss Dutch pairing",
-    "TRF16 core",
-    "TRF26 core",
-    "TRF pairing path",
-    "BBP checker",
-    "Tie-Break core/checker",
-    "Chess-Results protocol/core",
-    "player identity semantics",
-    "pairing identity semantics",
-    "tournament file format"
-  ],
-  "protectedFilesModifiedByDev23": false,
-  "next": "Build an exact protected-source dev23 Ubuntu test candidate from accepted runtime commit 39d698a1f6dd3015313d0113540212afb596bc2b, then install/start/test the real app on Ubuntu before any final/stable promotion."
+  "protectedCoreRule": "Any unexpected protected-core hash change requires STOP and investigation. Do not fork business/tournament logic for Linux.",
+  "versionRule": "Do not continue independent linuxdev numbering after parity. Do not start beta.82 feature work before beta.81 parity gate.",
+  "gitRule": "Every completed logical block: re-read HEAD, TEST, REGRESSION, commit/push fast-forward, verify remote HEAD, record SHA.",
+  "next": "Recover/materialize exact Windows beta.81 shared source or canonical additive modules as Linux shared input, then run protected hashes and targeted regression before any beta.81 Linux candidate promotion."
 }
