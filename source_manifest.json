@@ -1,25 +1,29 @@
 {
-  "schema": 2,
-  "snapshotId": "cp-v1.06.00-beta.81-shared-source-20260909",
-  "baseRelease": "v1.06.00-beta.81",
+  "schema": 3,
+  "snapshotId": "cp-v1.06.00-beta.85-shared-source-20260909",
+  "baseRelease": "v1.06.00-beta.85",
+  "authoritativeWindowsRepository": "kbilyal/Chess-Publisher-Windows-FIDE-Beta",
+  "authoritativeWindowsCommit": "1354a8061fbbc520ecd1ea09b93350e388428dfd",
+  "cloudFingerprintContentSchema": 7,
   "archive": {
-    "name": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
-    "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
-    "size": 1517904
+    "name": "Chess-Publisher-Windows-v1.06.00-beta.85-AUTHORITATIVE-SOURCE.tar.gz",
+    "sha256": "2795a0612f56f381b65db0c30c3171ccc5f4e16e9bc0778fa5bc7e61fe430e69",
+    "size": 27933592
   },
-  "note": "Exact authoritative Windows/Linux shared functional source. Linux adapters must wrap this source without reimplementing shared tournament/business logic.",
+  "note": "Exact authoritative Windows/Linux shared functional source for beta.85. Linux adapters wrap only manifest-listed shared files; Windows launchers/binaries are not copied into the Linux shared-source payload.",
   "files": {
-    "ChessPublisher.html": {"size": 1591436, "sha256": "7bdea647f95c3e387326e1290791d60696c140a273d55be8ad43c331362bf2c8"},
+    "ChessPublisher.html": {"size": 1591436, "sha256": "2a0437da7d6ae20f04cf4499ba36b6c7c81698c1517b390b1fed6f3775f5a175"},
     "cloud/client/cloud-workspace-api.js": {"size": 8150, "sha256": "733b9f921af5f4986c0ef89df62c650d1e621011b40aeeb02f5ba4ba900a1ab5"},
     "hub/client/hub-api-client.js": {"size": 11560, "sha256": "3fbf3413c2e3e90d198f0ca522f32dbfd3e32992a3a3670e8ec91bd6bbc577f7"},
     "hub/client/hub-snapshot.js": {"size": 13103, "sha256": "d980c520d74a71e66b3a3aa2a54e5ed626ea3618c53159145f9e48b445effac9"},
-    "webview/CloudWorkspaceAdapter.js": {"size": 72083, "sha256": "a25dba042e46d0f120f9cf721b68fdb70178ab323da902bbcc34c42e6947a602"},
+    "webview/CloudWorkspaceAdapter.js": {"sha256": "6ce71bd7b4eb4b2401e9ee657f60b308ed6222a162efa0ded925f9b510e9569e"},
+    "webview/CloudWorkspaceRedesign.js": {"sha256": "52f39e7c8ab992611f0f9b0eed02836cc19a002016d87b226b94da388f78177a"},
     "webview/HubAdapter.js": {"size": 45733, "sha256": "e5d61eb452f8b98e70e874cb5a90da2ab6dfe4669c9da363a5047332c9ae62c0"},
     "webview/WebViewAdapter.js": {"size": 7025, "sha256": "d23af37ce1624fac96b46f62c85d7801ed733a66f7e03bab40f453ce4db67861"}
   },
   "runtimeSharedFiles": {
-    "ChessPublisher.html": {"size": 1591436, "sha256": "7bdea647f95c3e387326e1290791d60696c140a273d55be8ad43c331362bf2c8"},
-    "VERSION.txt": {"size": 16, "sha256": "2bcc6d970152b4b6a43cb5cb9286b0b31bbc9902cfb6e0eb04a88e71ce7935da"},
+    "ChessPublisher.html": {"size": 1591436, "sha256": "2a0437da7d6ae20f04cf4499ba36b6c7c81698c1517b390b1fed6f3775f5a175"},
+    "VERSION.txt": {"size": 16, "sha256": "b9c3202d834191d9b45d5a9a7ac7bcd93d78d2b059825452194efcc9e4acfd3f"},
     "USER-MANUAL-EN.html": {"size": 42784, "sha256": "ec15f23a8861a2e771d9ebcfed6a71fb5fc5249740bce0c80feccd092b8fa8fe"},
     "ChessPublisher-Beta44-Compliance.js": {"size": 31519, "sha256": "dde75ac503b440545db94bc2c4a84c642b6083ea4ee2bf2d45869a2cf4a067be"},
     "ChessPublisher-Beta45-Compliance.js": {"size": 8622, "sha256": "ef806e408dafd7552ea4f32d1b76dc7dd93588146abe0207fded026dab5f23ca"},
@@ -54,21 +58,22 @@
     "cloud/client/cloud-workspace-api.js": {"size": 8150, "sha256": "733b9f921af5f4986c0ef89df62c650d1e621011b40aeeb02f5ba4ba900a1ab5"},
     "hub/client/hub-api-client.js": {"size": 11560, "sha256": "3fbf3413c2e3e90d198f0ca522f32dbfd3e32992a3a3670e8ec91bd6bbc577f7"},
     "hub/client/hub-snapshot.js": {"size": 13103, "sha256": "d980c520d74a71e66b3a3aa2a54e5ed626ea3618c53159145f9e48b445effac9"},
-    "webview/CloudWorkspaceAdapter.js": {"size": 72083, "sha256": "a25dba042e46d0f120f9cf721b68fdb70178ab323da902bbcc34c42e6947a602"},
-    "webview/CloudWorkspaceRedesign.js": {"size": 58019, "sha256": "361eaf46e31321d5a9fdd13380259e9dcfc4c398be6efbe5415066fc290685f5"},
+    "webview/CloudWorkspaceAdapter.js": {"sha256": "6ce71bd7b4eb4b2401e9ee657f60b308ed6222a162efa0ded925f9b510e9569e"},
+    "webview/CloudWorkspaceRedesign.js": {"sha256": "52f39e7c8ab992611f0f9b0eed02836cc19a002016d87b226b94da388f78177a"},
     "webview/HubAdapter.js": {"size": 45733, "sha256": "e5d61eb452f8b98e70e874cb5a90da2ab6dfe4669c9da363a5047332c9ae62c0"},
     "webview/WebViewAdapter.js": {"size": 7025, "sha256": "d23af37ce1624fac96b46f62c85d7801ed733a66f7e03bab40f453ce4db67861"}
   },
-  "protectedInvariantFiles": {
+  "protectedSharedFiles": {
     "cloud/client/cloud-workspace-api.js": {"size": 8150, "sha256": "733b9f921af5f4986c0ef89df62c650d1e621011b40aeeb02f5ba4ba900a1ab5"},
     "hub/client/hub-snapshot.js": {"size": 13103, "sha256": "d980c520d74a71e66b3a3aa2a54e5ed626ea3618c53159145f9e48b445effac9"},
-    "webview/CloudWorkspaceAdapter.js": {"size": 72083, "sha256": "a25dba042e46d0f120f9cf721b68fdb70178ab323da902bbcc34c42e6947a602"},
+    "webview/CloudWorkspaceAdapter.js": {"sha256": "6ce71bd7b4eb4b2401e9ee657f60b308ed6222a162efa0ded925f9b510e9569e"},
     "webview/HubAdapter.js": {"size": 45733, "sha256": "e5d61eb452f8b98e70e874cb5a90da2ab6dfe4669c9da363a5047332c9ae62c0"},
     "webview/WebViewAdapter.js": {"size": 7025, "sha256": "d23af37ce1624fac96b46f62c85d7801ed733a66f7e03bab40f453ce4db67861"}
   },
-  "expectedSharedEvolutionFiles": {
-    "ChessPublisher.html": {"size": 1591436, "sha256": "7bdea647f95c3e387326e1290791d60696c140a273d55be8ad43c331362bf2c8"},
-    "hub/client/hub-api-client.js": {"size": 11560, "sha256": "3fbf3413c2e3e90d198f0ca522f32dbfd3e32992a3a3670e8ec91bd6bbc577f7"}
+  "approvedSharedEvolutionFiles": {
+    "ChessPublisher.html": {"sha256": "2a0437da7d6ae20f04cf4499ba36b6c7c81698c1517b390b1fed6f3775f5a175"},
+    "webview/CloudWorkspaceAdapter.js": {"sha256": "6ce71bd7b4eb4b2401e9ee657f60b308ed6222a162efa0ded925f9b510e9569e"},
+    "webview/CloudWorkspaceRedesign.js": {"sha256": "52f39e7c8ab992611f0f9b0eed02836cc19a002016d87b226b94da388f78177a"}
   },
   "authoritativeTypeB": {
     "path": "ChessPublisher-Beta81-TypeB-RatingLists.js",

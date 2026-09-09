@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chess-Publisher Linux beta.81 entrypoint with platform-only integrations."""
+"""Chess-Publisher Linux beta.85 entrypoint with platform-only integrations."""
 from __future__ import annotations
 from pathlib import Path
 import chess_publisher_linux as app
@@ -22,11 +22,12 @@ from export_runtime_integration import apply as apply_export_runtime
 from browser_integration import apply as apply_browser
 from window_integration import apply as apply_window
 from pairings_result_desk_integration import apply as apply_pairings_result_desk
-from beta81_shared_source_integration import apply as apply_beta81_shared_source
+from shared_source_integration import apply as apply_shared_source
 
 # Platform/native adapters only. Shared rating-list semantics, Cloud identity,
-# Web-results reconciliation and unified SYNC come from exact beta.81 source.
-apply_build_identity();apply_hub_proxy();apply_fide_payload_policy();apply_fide_streaming();apply_fide_download();apply_fide_cache();apply_rating_lists();apply_fide_readiness();apply_fide();apply_chess_results();apply_dgt();apply_telegram();apply_desktop();apply_export_runtime();apply_browser();apply_window();apply_pairings_result_desk();apply_beta81_shared_source()
+# Web-results reconciliation, schema-7 fingerprinting and unified SYNC come
+# from exact beta.85 authoritative shared source.
+apply_build_identity();apply_hub_proxy();apply_fide_payload_policy();apply_fide_streaming();apply_fide_download();apply_fide_cache();apply_rating_lists();apply_fide_readiness();apply_fide();apply_chess_results();apply_dgt();apply_telegram();apply_desktop();apply_export_runtime();apply_browser();apply_window();apply_pairings_result_desk();apply_shared_source()
 
 if __name__=='__main__':
     package_root=Path(__file__).resolve().parent.parent

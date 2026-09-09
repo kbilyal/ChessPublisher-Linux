@@ -1,4 +1,4 @@
-name: Linux beta.81 Platform Acceptance
+name: Linux beta.85 Platform Acceptance
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
       - 'VERSION'
       - 'VERSION.txt'
       - 'source_manifest.json'
+      - 'CURRENT_STATE.json'
       - '.github/workflows/full-acceptance.yml'
   workflow_dispatch:
 
@@ -24,7 +25,7 @@ jobs:
     env:
       CP_RUNTIME: ${{ github.workspace }}/.runtime/materialized
     steps:
-      - name: Checkout Linux parity source
+      - name: Checkout Linux beta.85 alignment source
         uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,33 +33,45 @@ jobs:
           python-version: '3.13'
       - name: Install runtime dependency
         run: python -m pip install --disable-pip-version-check 'networkx>=2.6'
+      - name: Verify beta.85 alignment metadata
+        run: |
+          python tests/cross_platform_parity_guard.py
+          python tests/beta85_alignment_contract.py
+          python tests/test_shared_source_adapter.py
+          python tests/test_materialize_script.py
+          python ci/source_guard_contract.py
+          python ci/source_bootstrap_contract.py
+          python ci/linux_adapter_order_contract.py
       - name: Materialize platform runtime fail-closed without shared source
         run: |
           python scripts/bootstrap_dev21_from_upstream.py --output "$CP_RUNTIME" --allow-source-unavailable
           test -f "$CP_RUNTIME/MATERIALIZED_STATE.json"
-          test -f "$CP_RUNTIME/linux/beta81_shared_source_integration.py"
+          test -f "$CP_RUNTIME/linux/shared_source_integration.py"
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
           python - <<'PY'
           import json, os
           from pathlib import Path
           state=json.loads((Path(os.environ['CP_RUNTIME'])/'MATERIALIZED_STATE.json').read_text())
-          assert state['version']=='1.06.00-beta.81', state
-          assert state['sharedSourceSnapshot']=='cp-v1.06.00-beta.81-shared-source-20260909', state
+          assert state['version']=='1.06.00-beta.85', state
+          assert state['sharedSourceSnapshot']=='cp-v1.06.00-beta.85-shared-source-20260909', state
+          assert state['authoritativeWindowsCommit']=='1354a8061fbbc520ecd1ea09b93350e388428dfd', state
+          assert state['cloudFingerprintContentSchema']==7, state
           assert state['sharedSourceVerified'] is False, state
+          assert state['olderBeta81SharedSourceAllowed'] is False, state
           assert state['olderBeta34SharedSourceAllowed'] is False, state
           assert state['oldUpstreamRootSourceAllowed'] is False, state
-          print('HOSTED_BETA81_SHARED_SOURCE_FAIL_CLOSED=PASS')
+          print('HOSTED_BETA85_SHARED_SOURCE_FAIL_CLOSED=PASS')
           PY
           if [ -e "$CP_RUNTIME/source/ChessPublisher.html" ]; then echo '::error::Hosted platform materializer substituted shared source unexpectedly.'; exit 1; fi
-      - name: Verify beta.81 Linux adapter identity
+      - name: Verify beta.85 Linux adapter identity
         run: |
-          grep -F 'APP_BUILD = "1.06.00-beta.81"' "$CP_RUNTIME/linux/build_info.py"
-          grep -F 'apply_beta81_shared_source()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          grep -F 'APP_BUILD = "1.06.00-beta.85"' "$CP_RUNTIME/linux/build_info.py"
+          grep -F 'apply_shared_source()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_cloud_directional_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_cloud_unified_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
-          grep -F '/source/webview/CloudWorkspaceRedesign.js' "$CP_RUNTIME/linux/beta81_shared_source_integration.py"
+          grep -F '/source/webview/CloudWorkspaceRedesign.js' "$CP_RUNTIME/linux/shared_source_integration.py"
       - name: Compile platform runtime and adapters
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
@@ -69,11 +82,12 @@ jobs:
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
           node --check ci/export_webview_contract.mjs
-      - name: Run beta.81 architecture and native integration contracts
+      - name: Run Linux architecture and native integration contracts
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python tests/test_materialize_script.py
-          python tests/test_beta81_shared_source_adapter.py
+          python tests/test_shared_source_adapter.py
+          python tests/beta85_alignment_contract.py
           python tests/test_rating_lists.py
           python ci/source_guard_contract.py
           python ci/source_bootstrap_contract.py
@@ -128,12 +142,6 @@ jobs:
       - name: Install and self-test packages on Ubuntu 24.04 and 26.04
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
-          # GitHub's Ubuntu runner may temporarily expose an inconsistent
-          # Google Chrome apt index while its mirror is publishing. Chrome is
-          # already installed on the runner, and Chess-Publisher's package
-          # test must depend only on the Ubuntu package repositories. Disable
-          # that unrelated third-party source so an external Hash Sum mismatch
-          # cannot mask a real package regression.
           sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
           python ci/deb_install_smoke.py
           python ci/ubuntu_2604_container_smoke.py
@@ -146,15 +154,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linux-beta81-platform-acceptance-report
+          name: linux-beta85-platform-acceptance-report
           path: ${{ env.CP_RUNTIME }}/tests/logs/real-linux-acceptance.json
           if-no-files-found: warn
           retention-days: 90
-      - name: Upload beta.81 platform-only runtime kit
+      - name: Upload beta.85 platform-only runtime kit
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: chess-publisher-linux-beta81-platform-only-kit
+          name: chess-publisher-linux-beta85-platform-only-kit
           path: |
             ${{ env.CP_RUNTIME }}/linux
             ${{ env.CP_RUNTIME }}/packaging

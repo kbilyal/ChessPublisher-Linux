@@ -32,24 +32,29 @@ def verify_source(source_root: Path, manifest_path: Path) -> dict[str,Any]:
     specs=manifest.get('runtimeSharedFiles') or manifest.get('files') or {}
     checked=[]
     for rel,spec in specs.items():
+        if not isinstance(spec,dict):
+            raise SourceIdentityError(f'Invalid shared source manifest entry: {rel}')
         p=(source_root/rel).resolve()
         if source_root not in p.parents and p!=source_root:
             raise SourceIdentityError(f'Unsafe source path in manifest: {rel}')
         if not p.is_file():
             raise SourceIdentityError(f'Required shared source file is missing: {rel}')
-        expected_size=int(spec.get('size') or 0);actual_size=p.stat().st_size
-        if actual_size!=expected_size:
-            raise SourceIdentityError(f'Shared source size mismatch for {rel}: expected {expected_size}, got {actual_size}.')
-        got=_sha256(p);expected=str(spec.get('sha256') or '').lower()
+        actual_size=p.stat().st_size
+        if 'size' in spec:
+            try: expected_size=int(spec['size'])
+            except Exception as exc: raise SourceIdentityError(f'Invalid shared source size for {rel}.') from exc
+            if expected_size<0 or actual_size!=expected_size:
+                raise SourceIdentityError(f'Shared source size mismatch for {rel}: expected {expected_size}, got {actual_size}.')
+        expected=str(spec.get('sha256') or '').lower()
+        if not re.fullmatch(r'[0-9a-f]{64}',expected):
+            raise SourceIdentityError(f'Shared source SHA256 is missing/invalid for {rel}.')
+        got=_sha256(p)
         if got!=expected:
             raise SourceIdentityError(f'Shared source SHA256 mismatch for {rel}: expected {expected}, got {got}.')
         checked.append({'path':rel,'size':actual_size,'sha256':got})
     version_file=source_root/'VERSION.txt'
     version=version_file.read_text(encoding='utf-8').strip() if version_file.is_file() else ''
     base=str(manifest.get('baseRelease') or '').removeprefix('v')
-    # Production/shared manifests carry a real Chess-Publisher beta version and
-    # therefore require exact VERSION.txt equality. Small synthetic CI fixtures
-    # may use labels such as "ci" and validate only their declared file hashes.
     if re.fullmatch(r'\d+\.\d+\.\d+-beta\.\d+',base):
         if version!=base:
             raise SourceIdentityError(f'Shared source VERSION.txt mismatch: expected {base}, got {version or "missing"}.')
