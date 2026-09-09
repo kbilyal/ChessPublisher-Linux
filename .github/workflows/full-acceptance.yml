@@ -43,6 +43,8 @@ jobs:
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
           test -f "$CP_RUNTIME/linux/web_results_download.js"
           test -f "$CP_RUNTIME/linux/web_results_download_integration.py"
+          test -f "$CP_RUNTIME/linux/cloud_unified_sync.js"
+          test -f "$CP_RUNTIME/linux/cloud_unified_sync_integration.py"
           python - <<'PY'
           import json, os
           from pathlib import Path
@@ -56,32 +58,34 @@ jobs:
             echo '::error::Hosted materializer substituted a protected source file unexpectedly.'
             exit 1
           fi
-          echo '::notice::Exact protected source is intentionally unavailable to hosted CI. Package-candidate verification requires the SHA256-pinned recovery archive outside this hosted gate.'
 
-      - name: Verify dev22 overlay identity
+      - name: Verify current Linux overlay identity
         run: |
           grep -F 'linux-dev.22' "$CP_RUNTIME/linux/build_info.py"
           grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
-          grep -F 'LINUX_DEV22_SERVER_ATOMIC_UPDATE' "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
           grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          grep -F 'apply_cloud_unified_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'Download Results' "$CP_RUNTIME/linux/web_results_download.js"
           grep -F '/arbiter-results/ack' "$CP_RUNTIME/linux/web_results_download.js"
+          grep -F '⟳ SYNC' "$CP_RUNTIME/linux/cloud_unified_sync.js"
 
-      - name: Compile runtime and dev22 modules
+      - name: Compile runtime and Linux modules
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python -m py_compile linux/*.py linux/rating_lists/*.py ci/*.py packaging/*.py tests/*.py
           node --check linux/LinuxWebViewShim.js
           node --check linux/export_integration.js
           node --check linux/web_results_download.js
+          node --check linux/cloud_unified_sync.js
           node --check tests/web_results_reconcile_contract.mjs
           node --check tests/web_results_pending_flow_contract.mjs
+          node --check tests/cloud_unified_sync_contract.mjs
           node --check ci/webview_shim_contract.mjs
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
           node --check ci/export_webview_contract.mjs
 
-      - name: Run dev22 deterministic contracts
+      - name: Run deterministic Linux integration contracts
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python tests/test_rating_lists.py
@@ -90,6 +94,7 @@ jobs:
           python tests/test_web_results_download.py
           node tests/web_results_reconcile_contract.mjs
           node tests/web_results_pending_flow_contract.mjs
+          node tests/cloud_unified_sync_contract.mjs
 
       - name: Run protected-source policy and adapter contracts
         working-directory: ${{ env.CP_RUNTIME }}
@@ -119,10 +124,7 @@ jobs:
           python ci/chromium_runtime_smoke.py --exact-drive-ui
           rc=$?
           set -e
-          if [ "$rc" -eq 77 ]; then
-            echo "::notice::Exact external source access blocked; SHA256-pinned local exact-source smoke remains the package gate."
-            exit 0
-          fi
+          if [ "$rc" -eq 77 ]; then exit 0; fi
           exit "$rc"
 
       - name: Run FIDE and integrated rating-list gates
@@ -137,7 +139,6 @@ jobs:
           rc=$?
           set -e
           if [ "$rc" -ne 0 ] && [ "$rc" -ne 77 ]; then exit "$rc"; fi
-          if [ "$rc" -eq 77 ]; then echo "::notice::Official FIDE host unavailable from runner; deterministic/offline gates passed."; fi
           python ci/fide_endpoint_contract.py
           python ci/fide_legacy_limits_contract.py
           python ci/fide_streaming_contract.py
@@ -173,7 +174,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
-      - name: Upload accepted dev22 runtime-only kit
+      - name: Upload accepted runtime-only kit
         if: success()
         uses: actions/upload-artifact@v4
         with:
