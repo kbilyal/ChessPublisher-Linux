@@ -2,95 +2,46 @@
   "project": "Chess-Publisher",
   "linuxRepository": "kbilyal/ChessPublisher-Linux",
   "authoritativeBranch": "main",
-  "developmentModel": "ONE shared Chess-Publisher core, Windows and Linux version lockstep",
+  "developmentModel": "ONE shared Chess-Publisher core with Windows and Linux platform adapters",
+  "currentParityAnchor": "v1.06.00-beta.81",
   "targetSharedVersion": "v1.06.00-beta.81",
   "releaseCandidate": false,
-  "status": "BETA.81 CROSS-PLATFORM PARITY WORK IN PROGRESS - NOT A RELEASE CANDIDATE",
-  "windowsReference": {
-    "repository": "kbilyal/Chess-Publisher-Windows-FIDE-Beta",
-    "version": "v1.06.00-beta.81",
-    "headObservedAtAudit": "93f5474bd161057af0dec130d51663d10be004f7",
-    "typeBCheckpoint": "fc0672079e4e6d14106cb7844d855c9abcbb73c6",
-    "sourceArchiveSha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
+  "status": "BETA.81 WINDOWS/LINUX PARITY PASS - PACKAGE CANDIDATE NEXT",
+  "authoritativeSource": {
+    "archive": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
+    "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
+    "version": "1.06.00-beta.81",
     "typeBModuleSha256": "3d41cee5bafe393b5632f12be8874bdf4e207fab52af36e5391118679478fb96",
-    "sourcePatchSha256": "3baad0a3ded7b70db47100591fad04d9291e946ad51b4e7afb201cdca8de06e9",
-    "vcl": {
-      "pass": 159,
-      "partial": 14,
-      "fail": 0,
-      "conditional": 21,
-      "needsTest": 0,
-      "needsTec": 1,
-      "notApplicable": 30,
-      "externalTecRow": "Q18"
-    }
+    "typeBPatchSha256": "3baad0a3ded7b70db47100591fad04d9291e946ad51b4e7afb201cdca8de06e9"
   },
   "linuxRollbackBaseline": {
     "legacyVersion": "v1.06.00-beta.34-linuxdev23",
-    "preParityHead": "d86d9f92661dbfd64080c42b6e47b8856fe51159",
     "acceptedRuntimeCommit": "39d698a1f6dd3015313d0113540212afb596bc2b",
-    "hostedAcceptanceRun": 34373652571,
-    "hostedAcceptance": "PASS",
-    "protectedSourceSnapshot": "cp-v1.06.00-beta.34-linux-source-20260907",
-    "protectedSourceArchiveSha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff",
-    "lastExactPackage": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
-    "lastExactPackageSha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a"
+    "role": "rollback only; never a forward source lineage"
   },
-  "sourceRecovery": {
-    "beta80DriveSourcePresent": true,
-    "beta80AutomatedDownload": "BLOCKED_BY_GOOGLE_DRIVE_ABUSIVE_FILE_FLAG",
-    "beta81ExactArchiveLocated": false,
-    "policy": "Do not substitute unverified source; recover exact archive or exact canonical patch/module and verify hashes"
+  "parity": {
+    "conclusion": "PASS",
+    "sharedFilesByteIdentical": "574/574",
+    "unexpectedSharedDifferences": 0,
+    "protectedInvariant": "PASS",
+    "sharedTec": "42 PASS / 0 FAIL",
+    "typeB": "29/29 PASS",
+    "matrix": "20/20 PASS",
+    "externalTecDependency": "Q18"
   },
-  "parityAudit": {
-    "conclusion": "NOT YET PROVEN",
-    "rootGap": "Linux shared/protected source lineage is beta.34 while Windows reference is beta.81",
-    "alreadyAligned": [
-      "Gacrux 1.9.57 hosted baseline",
-      "Swiss/TRF16/TRF26/BBP/Tie-Break/Chess-Results hosted baseline",
-      "integrated official Standard/Rapid/Blitz local rating data",
-      "result-only Web reconciliation safety",
-      "stable-identity unified Cloud SYNC"
-    ],
-    "priorityGaps": [
-      "recover/materialize exact beta.81 shared source",
-      "prove beta.35-beta.70 TEC/VCL shared compliance on Linux",
-      "historical rating policies Q214-Q216",
-      "Pairings unified SYNC UX composition",
-      "Type-B Rating Lists Q120/Q122",
-      "cross-platform file/Cloud/TEC regression matrix"
-    ]
+  "linuxPlatformAcceptance": {
+    "commit": "30c6b924e11b9ebcd1ef2337761640c02cc1e580",
+    "runId": 34384400988,
+    "conclusion": "success",
+    "parityGuardRunId": 34384401055,
+    "parityGuardConclusion": "success",
+    "platformArtifactId": 10117259022,
+    "platformArtifactDigest": "sha256:fc107a9799be33c94e4b05c0bb3fe3ae0bfc9aeaf166e2df1b7e5a08385f1426",
+    "reportArtifactId": 10117257171,
+    "reportArtifactDigest": "sha256:1696bab39c55f5ace9bfbab42b64286076112c6b6dd4928306233da849dc99ad"
   },
-  "parityGuardEvidence": {
-    "commit": "064cdccad0618917f008edea1d60fa4767f584c3",
-    "crossPlatformParityGuard": {
-      "runNumber": 1,
-      "runId": 34379949705,
-      "conclusion": "success"
-    },
-    "linuxRollbackFullProtectedAcceptance": {
-      "runNumber": 25,
-      "runId": 34379949724,
-      "conclusion": "success",
-      "runtimeArtifactId": 10115525605,
-      "runtimeArtifactSha256": "f5244dda0c6917b040f3d63ec390cdae33e01817bb3afc59e8372388f3440018",
-      "reportArtifactId": 10115523823,
-      "reportArtifactSha256": "45c2defa6cb072201efdc1b0d11843d2d51db2ad05a2fcc86adeffb829eb637c",
-      "note": "This proves rollback baseline regression safety only, not beta.81 functional parity."
-    }
-  },
-  "references": {
-    "vcl": "VCL4THP.13.xlsx",
-    "tecManual": "TEC Manual 30HdT.docx",
-    "parityReport": "CROSS-PLATFORM-PARITY.md",
-    "tecStatus": "TEC-VCL-STATUS.md",
-    "checkpoint": "CHECKPOINTS/beta81-parity-baseline.md",
-    "sourceCheckpoint": "SOURCE-CHECKPOINT.md",
-    "sharedVersion": "VERSION.txt",
-    "regressionManifest": "REGRESSION-MANIFEST-v1.06.00-beta.81.json"
-  },
-  "protectedCoreRule": "Any unexpected protected-core hash change requires STOP and investigation. Do not fork business/tournament logic for Linux.",
-  "versionRule": "Do not continue independent linuxdev numbering after parity. Do not start beta.82 feature work before beta.81 parity gate.",
-  "gitRule": "Every completed logical block: re-read HEAD, TEST, REGRESSION, commit/push fast-forward, verify remote HEAD, record SHA.",
-  "next": "Recover/materialize exact Windows beta.81 shared source or canonical additive modules as Linux shared input, then run protected hashes and targeted regression before any beta.81 Linux candidate promotion."
+  "protectedCoreRule": "Any unexpected protected/shared hash change requires STOP and investigation. Never fork business/tournament logic for Linux.",
+  "versionRule": "beta.81 is the parity anchor. Do not create Linux beta.82. Next functional migration is exact Windows beta.83 once authoritative source and hashes are available.",
+  "gitRule": "Every logical block: re-read HEAD, test/regress, commit/push fast-forward only, verify remote main SHA.",
+  "next": "Build and smoke-test exact-source Linux v1.06.00-beta.81 package candidate; then freeze beta.81 and wait for exact Windows beta.83 source."
 }
