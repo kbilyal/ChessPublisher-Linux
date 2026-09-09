@@ -128,6 +128,13 @@ jobs:
       - name: Install and self-test packages on Ubuntu 24.04 and 26.04
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
+          # GitHub's Ubuntu runner may temporarily expose an inconsistent
+          # Google Chrome apt index while its mirror is publishing. Chrome is
+          # already installed on the runner, and Chess-Publisher's package
+          # test must depend only on the Ubuntu package repositories. Disable
+          # that unrelated third-party source so an external Hash Sum mismatch
+          # cannot mask a real package regression.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
           python ci/deb_install_smoke.py
           python ci/ubuntu_2604_container_smoke.py
       - name: Run protected engine format compatibility gates
