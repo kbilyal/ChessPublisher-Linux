@@ -5,8 +5,8 @@
   "developmentModel": "ONE shared Chess-Publisher core with Windows and Linux platform adapters",
   "currentParityAnchor": "v1.06.00-beta.81",
   "targetSharedVersion": "v1.06.00-beta.81",
-  "releaseCandidate": false,
-  "status": "BETA.81 WINDOWS/LINUX PARITY PASS - PACKAGE CANDIDATE NEXT",
+  "releaseCandidate": true,
+  "status": "BETA.81 WINDOWS/LINUX PARITY PASS - EXACT-SOURCE PACKAGE CANDIDATE PASS - FROZEN",
   "authoritativeSource": {
     "archive": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
     "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
@@ -40,8 +40,17 @@
     "reportArtifactId": 10117257171,
     "reportArtifactDigest": "sha256:1696bab39c55f5ace9bfbab42b64286076112c6b6dd4928306233da849dc99ad"
   },
+  "linuxPackageCandidate": {
+    "file": "Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb",
+    "sha256": "be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc",
+    "bytes": 32238004,
+    "packageVersion": "1.06.00~beta81",
+    "sourcePayload": "574/574 byte-identical",
+    "selfTest": "6 PASS / 0 FAIL",
+    "startSmoke": "PASS"
+  },
   "protectedCoreRule": "Any unexpected protected/shared hash change requires STOP and investigation. Never fork business/tournament logic for Linux.",
-  "versionRule": "beta.81 is the parity anchor. Do not create Linux beta.82. Next functional migration is exact Windows beta.83 once authoritative source and hashes are available.",
+  "versionRule": "beta.81 is the parity/package anchor. Do not create Linux beta.82. Next functional migration is exact Windows beta.83 once authoritative source and hashes are available.",
   "gitRule": "Every logical block: re-read HEAD, test/regress, commit/push fast-forward only, verify remote main SHA.",
-  "next": "Build and smoke-test exact-source Linux v1.06.00-beta.81 package candidate; then freeze beta.81 and wait for exact Windows beta.83 source."
+  "next": "Freeze beta.81. Wait for exact authoritative Windows beta.83 source + hashes, then reapply Linux platform adapters only and rerun the complete parity/protected regression sequence."
 }
