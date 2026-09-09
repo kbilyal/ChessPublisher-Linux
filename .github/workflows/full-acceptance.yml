@@ -40,30 +40,38 @@ jobs:
           test -f "$CP_RUNTIME/source/ChessPublisher.html"
           test -f "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
+          test -f "$CP_RUNTIME/linux/web_results_download.js"
+          test -f "$CP_RUNTIME/linux/web_results_download_integration.py"
 
       - name: Verify dev22 overlay identity
         run: |
           grep -F 'linux-dev.22' "$CP_RUNTIME/linux/build_info.py"
           grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'LINUX_DEV22_SERVER_ATOMIC_UPDATE' "$CP_RUNTIME/linux/rating_lists_ui_integration.py"
+          grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          grep -F 'Download Results' "$CP_RUNTIME/linux/web_results_download.js"
 
-      - name: Compile runtime and rating-list modules
+      - name: Compile runtime and dev22 modules
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
-          python -m py_compile linux/*.py linux/rating_lists/*.py ci/*.py packaging/*.py
+          python -m py_compile linux/*.py linux/rating_lists/*.py ci/*.py packaging/*.py tests/*.py
           node --check linux/LinuxWebViewShim.js
           node --check linux/export_integration.js
+          node --check linux/web_results_download.js
+          node --check tests/web_results_reconcile_contract.mjs
           node --check ci/webview_shim_contract.mjs
           node --check ci/telegram_webview_contract.mjs
           node --check ci/online_token_webview_contract.mjs
           node --check ci/export_webview_contract.mjs
 
-      - name: Run dev22 rating-list deterministic contracts
+      - name: Run dev22 deterministic contracts
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
           python tests/test_rating_lists.py
           python tests/test_rating_lists_ui.py
           python tests/test_materialize_script.py
+          python tests/test_web_results_download.py
+          node tests/web_results_reconcile_contract.mjs
 
       - name: Run protected source and adapter contracts
         working-directory: ${{ env.CP_RUNTIME }}
