@@ -1,0 +1,5 @@
+publish: v1.06.00-beta.81-linux
+mode: first-payload-rebuild
+linuxSourceCommit: 30c6b924e11b9ebcd1ef2337761640c02cc1e580
+windowsSourceCommit: 93f5474bd161057af0dec130d51663d10be004f7
+referenceFirstDebSha256: be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc
