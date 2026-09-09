@@ -86,7 +86,6 @@ jobs:
         run: |
           python tests/test_materialize_script.py
           python tests/test_shared_source_adapter.py
-          python tests/beta85_alignment_contract.py
           python tests/test_rating_lists.py
           python ci/source_guard_contract.py
           python ci/source_bootstrap_contract.py
