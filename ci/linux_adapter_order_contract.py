@@ -20,17 +20,34 @@ sys.path.insert(0,str(ROOT/'linux'))
 import runtime_instance_integration as instance
 original_probe=instance._probe
 try:
-    def check(states,expected):
+    def check(states,expected,scan_ports=6):
         instance._probe=lambda port: states.get(port,'occupied')
-        actual=instance.select_default_port(18765,6)
+        actual=instance.select_default_port(18765,scan_ports)
         if actual!=expected:raise RuntimeError(f'Runtime selection mismatch: {actual} != {expected}')
     check({18765:'current'},(18765,'current'))
     check({18765:'stale',18766:'free'},(18766,'stale-bypassed'))
     check({18765:'stale',18766:'free',18767:'current'},(18767,'current'))
     check({18765:'occupied',18766:'free'},(18766,'free'))
+    # Scan boundaries must be deterministic: a matching instance outside the configured
+    # range must not be reused, and scan_ports<=0 still probes exactly the base port.
+    check({18765:'occupied',18766:'free',18767:'current'},(18766,'free'),2)
+    check({18765:'free'},(18765,'free'),0)
+    # Fail closed when the complete scan range is owned by stale/foreign processes.
+    for states in (
+        {18765:'occupied',18766:'occupied',18767:'occupied'},
+        {18765:'stale',18766:'occupied',18767:'stale'},
+    ):
+        instance._probe=lambda port,states=states: states.get(port,'occupied')
+        try:
+            instance.select_default_port(18765,3)
+        except RuntimeError as exc:
+            if 'No free Chess-Publisher LocalEngine port found' not in str(exc):raise
+        else:
+            raise RuntimeError('Exhausted runtime port range must fail closed')
 finally:
     instance._probe=original_probe
 if not instance._explicit_port(['--port','19999']) or not instance._explicit_port(['--port=19999']) or instance._explicit_port(['--quiet']):raise RuntimeError('Explicit --port detection regression')
 print('BETA85_LINUX_ADAPTER_LOAD_ORDER=PASS')
 print('BETA85_LINUX_ONLINE_HUB_TAB_LAYOUT_GUARD=PASS')
 print('BETA85_STALE_RUNTIME_INSTANCE_SELECTION=PASS')
+print('BETA85_RUNTIME_INSTANCE_FAIL_CLOSED=PASS')
