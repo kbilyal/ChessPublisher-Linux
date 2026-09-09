@@ -4,12 +4,16 @@
   "authoritativeBranch": "main",
   "developmentModel": "ONE shared Chess-Publisher core, Windows and Linux version lockstep",
   "targetSharedVersion": "v1.06.00-beta.81",
+  "releaseCandidate": false,
   "status": "BETA.81 CROSS-PLATFORM PARITY WORK IN PROGRESS - NOT A RELEASE CANDIDATE",
   "windowsReference": {
     "repository": "kbilyal/Chess-Publisher-Windows-FIDE-Beta",
     "version": "v1.06.00-beta.81",
     "headObservedAtAudit": "93f5474bd161057af0dec130d51663d10be004f7",
     "typeBCheckpoint": "fc0672079e4e6d14106cb7844d855c9abcbb73c6",
+    "sourceArchiveSha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
+    "typeBModuleSha256": "3d41cee5bafe393b5632f12be8874bdf4e207fab52af36e5391118679478fb96",
+    "sourcePatchSha256": "3baad0a3ded7b70db47100591fad04d9291e946ad51b4e7afb201cdca8de06e9",
     "vcl": {
       "pass": 159,
       "partial": 14,
@@ -31,6 +35,12 @@
     "protectedSourceArchiveSha256": "19d6f55bd6954db4cd6327ad61892b538e5b7a7129ac1fce2adf5e3ec2176eff",
     "lastExactPackage": "Chess-Publisher-v1.06.00-beta.34-linuxdev22-Ubuntu-amd64.deb",
     "lastExactPackageSha256": "c1ecf6cf9936735a526a4e9c9eb28363d52a867a415b0142188538fa85f5e01a"
+  },
+  "sourceRecovery": {
+    "beta80DriveSourcePresent": true,
+    "beta80AutomatedDownload": "BLOCKED_BY_GOOGLE_DRIVE_ABUSIVE_FILE_FLAG",
+    "beta81ExactArchiveLocated": false,
+    "policy": "Do not substitute unverified source; recover exact archive or exact canonical patch/module and verify hashes"
   },
   "parityAudit": {
     "conclusion": "NOT YET PROVEN",
@@ -56,7 +66,9 @@
     "tecManual": "TEC Manual 30HdT.docx",
     "parityReport": "CROSS-PLATFORM-PARITY.md",
     "tecStatus": "TEC-VCL-STATUS.md",
-    "checkpoint": "CHECKPOINTS/beta81-parity-baseline.md"
+    "checkpoint": "CHECKPOINTS/beta81-parity-baseline.md",
+    "sourceCheckpoint": "SOURCE-CHECKPOINT.md",
+    "sharedVersion": "VERSION.txt"
   },
   "protectedCoreRule": "Any unexpected protected-core hash change requires STOP and investigation. Do not fork business/tournament logic for Linux.",
   "versionRule": "Do not continue independent linuxdev numbering after parity. Do not start beta.82 feature work before beta.81 parity gate.",

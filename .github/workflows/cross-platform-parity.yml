@@ -1,0 +1,18 @@
+name: Cross-Platform Parity Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  parity-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shared version/source gate
+        run: python3 tests/cross_platform_parity_guard.py
