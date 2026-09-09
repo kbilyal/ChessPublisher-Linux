@@ -1,58 +1,36 @@
 # Linux changelog
 
-## v1.06.00-beta.34-linuxdev23 — HOSTED ACCEPTANCE PASSED / TEST DEVELOPMENT
-- Replaced the normal directional `Upload Current` / `Pull Current` workflow with one explicit `SYNC` control.
-- Kept the existing canonical Cloud identity model; no second ID model was introduced.
-  - `cloud.internalId` / Cloud `localKey` remain the stable logical identity.
-  - `cloud.cloudTournamentId` remains the linked Cloud object identity.
-  - Rename, revision, filename and import origin do not change identity.
-- `SYNC` delegates BASE/LOCAL/REMOTE classification and field-level merge to the existing directional engine.
-  - Desktop-only change -> push.
-  - Cloud-only change -> pull.
-  - No change -> In Sync.
-  - Non-overlapping two-sided changes -> safe merge and push in one SYNC operation.
-  - Same-field divergence -> explicit conflict resolution; no silent overwrite.
-- Removed normal `Upload as New` access for an already linked current tournament and hides obsolete `Upload Current` / `Pull Current` controls.
-- Removed the `Public List` block from the Linux normal Cloud UI.
-- `Refresh` now reuses the existing My Online Tournaments list refresh and status check only. It never performs hidden push/pull or resolves conflicts.
-- Autosave remains local-only.
-- `Download Results` remains a separate results-only action.
-  - Exact board number + White/Black key identity only.
-  - Web blank result never deletes a Desktop result.
-  - Pairing mismatch is skipped; no guessing or color swapping.
-  - Only `board.result` may change.
-  - Result conflicts use explicit `Keep Desktop` / `Use Web` buttons instead of OK/Cancel semantics.
-  - Accepted result decisions are saved locally and passed through the same unified Cloud SYNC before pending Web submissions can be acknowledged.
-  - If SYNC does not reach `In Sync`, the local decision stays saved but the Web submission remains pending for safe retry.
-- Added `cloud_sync_dev23_regression.mjs` covering the 21 requested identity/sync/result/Refresh/Autosave contracts.
-- No protected source/core was modified.
+## v1.06.00-beta.85 — HOSTED PLATFORM ALIGNMENT PASS / EXACT-SOURCE PACKAGE PENDING
+- Advanced the active Linux product/version target from the beta.81 parity anchor to the current authoritative Windows `v1.06.00-beta.85` line.
+- Pinned Windows beta.85 source commit `1354a8061fbbc520ecd1ea09b93350e388428dfd`, authoritative archive SHA256 `2795a0612f56f381b65db0c30c3171ccc5f4e16e9bc0778fa5bc7e61fe430e69`, and Cloud fingerprint schema 7.
+- Replaced the beta81-named delivery adapter with generic `shared_source_integration.py`; it is platform transport only and loads the shared WebView/Hub/Cloud stack in Windows-compatible order.
+- Active Linux entrypoint no longer enables Linux-specific Cloud directional/unified SYNC, Web-results, or rating-list UI business forks. Native Linux rating-data backend remains platform infrastructure.
+- Updated fail-closed source guard/bootstrap/materializer for exact beta.85 identity. Older beta.81/beta.34/upstream-root shared source cannot silently substitute.
+- The beta.85 materializer copies only manifest-listed shared files from the authoritative Windows source; Windows binaries/launchers are not copied into Linux runtime.
+- Updated legacy Web-results and Rating Lists regression contracts so rollback safety remains tested while active beta.85 business/UI semantics are required to come from shared source.
+- No Gacrux 1.9.57, Swiss Dutch pairing, TRF16/TRF26, TRF pairing path, BBP, Tie-Break, Chess-Results protocol/core, player/pairing identity or tournament-file core was changed.
 
 ### Accepted hosted gates
-- Implementation commit: `39d698a1f6dd3015313d0113540212afb596bc2b`.
-- Linux Web Results Download #7 (`34373652482`): **SUCCESS**.
-- Linux Rating Lists #10 (`34373652481`): **SUCCESS**.
-- Linux Full Protected Acceptance #24 (`34373652571`): **SUCCESS**.
-- Full gate passed real Chromium UI, FIDE/Rating Lists, Chess-Results/LocalEngine, Ubuntu 24.04, Ubuntu 26.04, TRF16, TRF26, Gacrux 1.9.57, BBP and Tie-Break.
-- Runtime-only artifact: `chess-publisher-linux-dev23-runtime-only-kit`, ID `10113058905`, digest `sha256:9cd3f054e1a259902ed54c3a6fb6dd32fa37c8d724b322b13050033f880896e0`.
-- Acceptance report: `linux-dev23-full-acceptance-report`, ID `10113056566`, digest `sha256:372f08eba086b4c702a6b03d7182e18e8d33da9e5f3b4090a7159d89a41f75fd`.
-- Status remains **TEST DEVELOPMENT**, not final/stable: exact protected-source dev23 packaging and real Ubuntu user runtime confirmation are still required.
+- Implementation commit: `249469275061581edd822870d0797ebf6c7a9617`.
+- Accepted hosted test commit: `a19155fa2002d8175f3db4ba046cdba903d172bf`.
+- Linux beta.85 Platform Acceptance #42 (`34406223149`): **SUCCESS**.
+- Cross-Platform Parity #38 (`34406223165`): **SUCCESS**.
+- Linux Rating Lists #16 (`34406223143`): **SUCCESS**.
+- Linux Web Results #10 (`34406223189`): **SUCCESS**.
+- Platform gate passed real Chromium, FIDE/Rating Lists, Chess-Results/LocalEngine, Ubuntu 24.04, Ubuntu 26.04, TRF16/TRF26, Gacrux 1.9.57, BBP and Tie-Break.
+- Platform-only artifact: `chess-publisher-linux-beta85-platform-only-kit`, ID `10125532864`, digest `sha256:ef9ee9136b79bf86f15f52265b20f987a4ab6e1734bb24314f4513b08103fe35`.
+- Acceptance report: ID `10125531728`, digest `sha256:a691165aabfe9f41ce4cc89d60b74c6f8485bd2a8af8e4261962e5b8d0b145bb`.
 
-## v1.06.00-beta.34-linuxdev22 — TEST CANDIDATE
-- Dedicated `kbilyal/ChessPublisher-Linux` repository established as Linux source of truth.
-- Added integrated FIDE Standard/Rapid/Blitz local reference database with generation-based SQLite, atomic activation and rollback safety.
-- Added Pairings `Download Results` for pending Arbiter Access Web results with result-only matching/mutation safety.
-- Reworked protected-source materialization to fail closed and retain exact SHA256-pinned source identity.
-- Linux Full Protected Acceptance #17 (`34359612332`) SUCCESS at runtime commit `eeb30c4cb08ec4dd760b1af800c5d3c56700c557`.
-- Exact dev22 protected-source package self-test PASS; dev22 remained a test candidate, not final/stable.
+### Remaining gate
+The exact beta.85 source archive is present in Google Drive but connected raw materialization returns provider HTTP 403. Therefore this is **not** an exact-source Linux beta.85 package/release checkpoint yet. No beta.85 `.deb` is claimed and `releaseCandidate=false` remains mandatory.
 
-## v1.06.00-beta.34-linuxdev21
-- Fluidity v2 integrated.
-- Pairings Result Desk fixed; board table scrolls independently.
-- Chess-Results main tab kept visible.
-- Clean tab navigation skips redundant full persistence.
-- Stale view-only rendering guarded.
-- Linux Ubuntu Acceptance #242 SUCCESS.
-- Ubuntu 24.04/26.04 install gates PASS.
-- TRF16/TRF26 PASS.
-- Chess-Results secure Worker contract PASS.
-- Gacrux 1.9.57 / BBP / Tie-Break PASS.
+## v1.06.00-beta.81 — EXACT SHARED-SOURCE PARITY ANCHOR
+- Exact Windows/Linux shared source parity proven: 574/574 authoritative shared files byte-identical.
+- Linux commit `30c6b924e11b9ebcd1ef2337761640c02cc1e580`; Platform Acceptance `34384400988` PASS; Windows/Linux matrix 20/20 PASS.
+- First managed Linux beta.81 `.deb` SHA256: `be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc`.
+- Remains the last fully proven exact-source rollback/parity anchor until beta.85 exact-source proof is completed.
+
+## v1.06.00-beta.34-linuxdev23 — LEGACY ROLLBACK
+- Accepted runtime commit: `39d698a1f6dd3015313d0113540212afb596bc2b`.
+- Hosted Full Protected Acceptance #24 (`34373652571`): SUCCESS.
+- This line is rollback history only and must not be used as forward source lineage.
