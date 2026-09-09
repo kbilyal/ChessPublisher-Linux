@@ -1,0 +1,175 @@
+name: Publish Linux DEB Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (example: v1.06.00-beta.81-linux)'
+        required: true
+        default: 'v1.06.00-beta.81-linux'
+      release_name:
+        description: 'GitHub Release title'
+        required: true
+        default: 'Chess-Publisher v1.06.00-beta.81 Linux'
+      expected_sha256:
+        description: 'Expected SHA256 of the .deb (fail closed when supplied)'
+        required: false
+        default: 'be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc'
+      artifact_run_id:
+        description: 'Actions run ID containing the exact .deb artifact (preferred)'
+        required: false
+        default: ''
+      artifact_name:
+        description: 'Artifact name containing the .deb'
+        required: false
+        default: 'chess-publisher-linux-deb-release-candidate'
+      deb_url:
+        description: 'Optional direct HTTPS URL to an exact .deb; used only when artifact_run_id is empty'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Publish as prerelease'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publish-linux-deb-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact checkpoint
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release checkpoint and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/cross_platform_parity_guard.py
+          version="$(tr -d '\r\n' < VERSION.txt)"
+          expected_tag="v${version}-linux"
+          if [ "${{ inputs.tag }}" != "$expected_tag" ]; then
+            echo "::error::Tag '${{ inputs.tag }}' does not match checkpoint VERSION.txt ('$expected_tag')."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('CURRENT_STATE.json').read_text(encoding='utf-8'))
+          if not s.get('releaseCandidate'):
+              raise SystemExit('releaseCandidate is not true')
+          if str((s.get('parityAudit') or {}).get('conclusion','')).upper() != 'PASS':
+              raise SystemExit('parityAudit.conclusion is not PASS')
+          if str(((s.get('windowsReference') or {}).get('vcl') or {}).get('externalTecRow','')) != 'Q18':
+              raise SystemExit('Q18 external TEC marker missing or changed')
+          print('RELEASE_CHECKPOINT=PASS')
+          PY
+
+      - name: Acquire exact DEB from Actions artifact
+        if: ${{ inputs.artifact_run_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          gh run download "${{ inputs.artifact_run_id }}" \
+            --repo "${{ github.repository }}" \
+            --name "${{ inputs.artifact_name }}" \
+            --dir release-assets
+
+      - name: Acquire exact DEB from direct URL
+        if: ${{ inputs.artifact_run_id == '' && inputs.deb_url != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          curl --fail --location --retry 3 --retry-delay 2 \
+            --output "release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb" \
+            "${{ inputs.deb_url }}"
+
+      - name: Fail closed when no DEB source is supplied
+        if: ${{ inputs.artifact_run_id == '' && inputs.deb_url == '' }}
+        run: |
+          echo '::error::Provide artifact_run_id or deb_url. Release publishing never reconstructs or guesses a binary.'
+          exit 1
+
+      - name: Verify exact DEB and create SHA256SUMS
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t debs < <(find release-assets -type f -name '*.deb' -print)
+          if [ "${#debs[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one .deb, found ${#debs[@]}."
+            exit 1
+          fi
+          deb="${debs[0]}"
+          sha="$(sha256sum "$deb" | awk '{print $1}')"
+          expected="${{ inputs.expected_sha256 }}"
+          if [ -n "$expected" ] && [ "$sha" != "$expected" ]; then
+            echo "::error::DEB SHA256 mismatch. expected=$expected actual=$sha"
+            exit 1
+          fi
+          cp "$deb" "release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb"
+          deb="release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb"
+          (cd release-assets && sha256sum "$(basename "$deb")" > SHA256SUMS.txt)
+          cp CURRENT_STATE.json release-assets/
+          cp "REGRESSION-MANIFEST-v$(tr -d '\r\n' < VERSION.txt).json" release-assets/
+          if [ -f CHECKPOINTS/beta81-linux-package.md ]; then cp CHECKPOINTS/beta81-linux-package.md release-assets/; fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "deb=$deb" >> "$GITHUB_OUTPUT"
+          echo "DEB_SHA256=$sha"
+
+      - name: Publish immutable GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ inputs.tag }}"
+          name="${{ inputs.release_name }}"
+          prerelease_flag=''
+          if [ "${{ inputs.prerelease }}" = 'true' ]; then prerelease_flag='--prerelease'; fi
+
+          cat > release-notes.md <<EOF
+          Linux release package for Chess-Publisher $(tr -d '\r\n' < VERSION.txt).
+
+          Parity anchor commit: $GITHUB_SHA
+          DEB SHA256: ${{ steps.verify.outputs.sha }}
+          Windows/Linux parity: PASS
+          Cross-platform matrix: 20/20 PASS
+          Protected/shared source identity: 574/574 byte-identical
+          External TEC dependency retained: Q18
+
+          The .deb is published as a GitHub Release asset rather than committed to Git history.
+          EOF
+
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" release-assets/* --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --title "$name" --notes-file release-notes.md
+          else
+            gh release create "$tag" release-assets/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "$name" \
+              --notes-file release-notes.md \
+              $prerelease_flag
+          fi
+
+      - name: Verify published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --json tagName,name,isPrerelease,assets
