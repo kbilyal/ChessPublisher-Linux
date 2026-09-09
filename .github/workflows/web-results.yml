@@ -1,0 +1,30 @@
+name: Linux Web Results Download
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'linux/web_results_download.js'
+      - 'linux/web_results_download_integration.py'
+      - 'linux/chess_publisher_linux_entry.py'
+      - 'tests/test_web_results_download.py'
+      - 'tests/web_results_reconcile_contract.mjs'
+      - '.github/workflows/web-results.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: python -m py_compile linux/web_results_download_integration.py tests/test_web_results_download.py
+      - name: JavaScript syntax
+        run: node --check linux/web_results_download.js
+      - name: Result-only static safety contract
+        run: python tests/test_web_results_download.py
+      - name: Deterministic reconcile contract
+        run: node tests/web_results_reconcile_contract.mjs
