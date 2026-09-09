@@ -1,64 +1,87 @@
 {
-  "versionTarget": "v1.06.00-beta.81",
-  "scope": "Windows/Linux parity baseline and fail-closed source/version gate",
-  "status": "PASS FOR AUDIT/GUARD ONLY - BETA.81 PARITY NOT YET PROVEN",
-  "commitUnderTest": "064cdccad0618917f008edea1d60fa4767f584c3",
-  "gates": {
-    "crossPlatformParityGuard": {
-      "runNumber": 1,
-      "runId": 34379949705,
-      "conclusion": "success",
-      "meaning": "Shared target is beta.81 and release promotion is correctly blocked while protected/shared source remains beta.34"
-    },
-    "linuxRollbackFullProtectedAcceptance": {
-      "runNumber": 25,
-      "runId": 34379949724,
-      "conclusion": "success",
-      "meaning": "The existing dev23 Linux rollback/runtime baseline remains regression-clean after parity metadata/guard additions; this is NOT proof of beta.81 functional parity",
-      "covered": [
-        "deterministic Linux integration contracts",
-        "protected-source policy and adapter contracts",
-        "real Chromium UI",
-        "FIDE and integrated rating lists",
-        "Chess-Results and LocalEngine",
-        "Ubuntu 24.04 and Ubuntu 26.04 package self-test",
-        "TRF16/TRF26",
-        "Gacrux 1.9.57",
-        "BBP",
-        "Tie-Break"
-      ],
-      "artifacts": {
-        "runtimeOnlyKit": {
-          "id": 10115525605,
-          "name": "chess-publisher-linux-dev23-runtime-only-kit",
-          "sha256": "f5244dda0c6917b040f3d63ec390cdae33e01817bb3afc59e8372388f3440018"
-        },
-        "acceptanceReport": {
-          "id": 10115523823,
-          "name": "linux-dev23-full-acceptance-report",
-          "sha256": "45c2defa6cb072201efdc1b0d11843d2d51db2ad05a2fcc86adeffb829eb637c"
-        }
+  "version": "v1.06.00-beta.81",
+  "status": "PASS - CROSS-PLATFORM PARITY ANCHOR",
+  "date": "2026-09-09",
+  "releaseCandidate": false,
+  "authoritativeSource": {
+    "archive": "Chess-Publisher-Windows-FIDE-Beta81-SOURCE.tar.gz",
+    "sha256": "b7b728d3dc545f8cc07abed1580f4b57b151047971ab36438b58be4c1d80fc6b",
+    "internalVersion": "1.06.00-beta.81",
+    "typeBModuleSha256": "3d41cee5bafe393b5632f12be8874bdf4e207fab52af36e5391118679478fb96",
+    "typeBPatchSha256": "3baad0a3ded7b70db47100591fad04d9291e946ad51b4e7afb201cdca8de06e9"
+  },
+  "sharedSourceIntegrity": {
+    "authoritativeFiles": 574,
+    "linuxSharedFiles": 574,
+    "byteIdentical": true,
+    "differences": 0,
+    "protectedInvariantPass": true,
+    "windowsProtectedEvidence": "70/70 byte-identical"
+  },
+  "sharedTecRegression": {
+    "pass": 42,
+    "fail": 0,
+    "staticAudit": "PASS",
+    "externalTecDependency": "Q18"
+  },
+  "typeB": {
+    "pass": 29,
+    "fail": 0,
+    "q120": "PASS",
+    "q122": "PASS",
+    "standard": "PASS",
+    "rapid": "PASS",
+    "blitz": "PASS",
+    "originalSourceKnownFalse": "PASS",
+    "import": "PASS",
+    "catalogue": "PASS",
+    "delete": "PASS",
+    "lookup": "PASS"
+  },
+  "linuxPlatformAcceptance": {
+    "headSha": "30c6b924e11b9ebcd1ef2337761640c02cc1e580",
+    "runId": 34384400988,
+    "conclusion": "success",
+    "parityGuardRunId": 34384401055,
+    "parityGuardConclusion": "success",
+    "ubuntu2404": "PASS",
+    "ubuntu2604": "PASS",
+    "trf16Trf26": "PASS",
+    "gacrux": "1.9.57 PASS",
+    "bbp": "6.0.0 PASS",
+    "tieBreak": "27/27 ranks, 0 mismatches",
+    "chessResults": "PASS",
+    "localEngine": "PASS",
+    "chromium": "PASS",
+    "externalBlocks": [
+      "hosted live FIDE archive download timed out; offline/cache/endpoint/streaming gates passed",
+      "hosted raw Drive exact-source UI access unavailable; authoritative source was independently hash-verified"
+    ],
+    "artifacts": {
+      "platformKit": {
+        "id": 10117259022,
+        "digest": "sha256:fc107a9799be33c94e4b05c0bb3fe3ae0bfc9aeaf166e2df1b7e5a08385f1426"
+      },
+      "acceptanceReport": {
+        "id": 10117257171,
+        "digest": "sha256:1696bab39c55f5ace9bfbab42b64286076112c6b6dd4928306233da849dc99ad"
       }
     }
   },
-  "protectedSource": {
-    "currentLinuxBase": "v1.06.00-beta.34",
-    "targetSharedBase": "v1.06.00-beta.81",
-    "beta81SourceRecovered": false,
-    "releaseCandidateAllowed": false
+  "crossPlatformMatrix": {
+    "pass": 20,
+    "fail": 0,
+    "needsTest": 0,
+    "methodology": "Exact authoritative Windows beta.81 shared-source regressions + byte-identical Linux shared source + deterministic storage/identity tests + native Linux acceptance. Native Windows executable not run inside Linux CI."
   },
-  "vcl": {
-    "windowsBeta81": {
-      "pass": 159,
-      "partial": 14,
-      "fail": 0,
-      "conditional": 21,
-      "needsTest": 0,
-      "needsTec": 1,
-      "notApplicable": 30
-    },
-    "linuxParity": "NEEDS ALIGNMENT/TEST; Windows PASS labels are not inherited",
-    "externalTecDependency": "Q18"
+  "windowsVclEvidence": {
+    "pass": 159,
+    "partial": 14,
+    "fail": 0,
+    "conditional": 21,
+    "needsTest": 0,
+    "needsTec": 1,
+    "notApplicable": 30
   },
-  "nextGate": "Recover and hash-verify exact beta.81 shared source, integrate Linux adapters against it, then execute the 20-point cross-platform matrix and row-by-row TEC/VCL parity evidence."
+  "next": "Build exact-source Linux beta.81 parity package candidate as an anchor; do not start beta.82. Migrate next to exact beta.83 source when authoritative hashes are available."
 }
