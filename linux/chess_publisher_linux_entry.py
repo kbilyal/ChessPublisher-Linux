@@ -24,6 +24,7 @@ from browser_integration import apply as apply_browser
 from window_integration import apply as apply_window
 from pairings_result_desk_integration import apply as apply_pairings_result_desk
 from cloud_directional_sync_integration import apply as apply_cloud_directional_sync
+from web_results_download_integration import apply as apply_web_results_download
 
 apply_build_identity()
 apply_hub_proxy()
@@ -44,6 +45,7 @@ apply_browser()
 apply_window()
 apply_pairings_result_desk()
 apply_cloud_directional_sync()
+apply_web_results_download()
 
 if __name__=='__main__':
     package_root=Path(__file__).resolve().parent.parent
