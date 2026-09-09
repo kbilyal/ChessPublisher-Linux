@@ -3,10 +3,10 @@
   "linuxRepository": "kbilyal/ChessPublisher-Linux",
   "authoritativeBranch": "main",
   "developmentModel": "ONE shared Chess-Publisher core with Windows and Linux platform adapters",
-  "currentParityAnchor": "v1.06.00-beta.81",
+  "currentParityAnchor": "v1.06.00-beta.85 exact-source test candidate",
   "targetSharedVersion": "v1.06.00-beta.85",
   "releaseCandidate": false,
-  "status": "BETA.85 HOSTED PLATFORM ALIGNMENT PASSED - EXACT SHARED-SOURCE BYTE PARITY/PACKAGE PENDING - NOT RELEASE CANDIDATE",
+  "status": "BETA.85 EXACT-SOURCE ONLINE HUB FIX PACKAGE PASS - REAL USER UBUNTU INSTALL/START CONFIRMATION PENDING - NOT FINAL/STABLE",
   "windowsReference": {
     "version": "v1.06.00-beta.85",
     "repository": "kbilyal/Chess-Publisher-Windows-FIDE-Beta",
@@ -38,33 +38,50 @@
     "snapshotId": "cp-v1.06.00-beta.85-shared-source-20260909",
     "archive": "Chess-Publisher-Windows-v1.06.00-beta.85-AUTHORITATIVE-SOURCE.tar.gz",
     "sha256": "2795a0612f56f381b65db0c30c3171ccc5f4e16e9bc0778fa5bc7e61fe430e69",
+    "bytes": 27933592,
     "version": "1.06.00-beta.85",
     "windowsCommit": "1354a8061fbbc520ecd1ea09b93350e388428dfd",
     "cloudFingerprintContentSchema": 7,
+    "verifiedRuntimeSharedFiles": "40/40 PASS",
+    "chessPublisherHtml": {
+      "bytes": 1592803,
+      "sha256": "2a0437da7d6ae20f04cf4499ba36b6c7c81698c1517b390b1fed6f3775f5a175"
+    },
     "changedSharedHashes": {
       "ChessPublisher.html": "2a0437da7d6ae20f04cf4499ba36b6c7c81698c1517b390b1fed6f3775f5a175",
       "webview/CloudWorkspaceAdapter.js": "6ce71bd7b4eb4b2401e9ee657f60b308ed6222a162efa0ded925f9b510e9569e",
       "webview/CloudWorkspaceRedesign.js": "52f39e7c8ab992611f0f9b0eed02836cc19a002016d87b226b94da388f78177a",
       "VERSION.txt": "b9c3202d834191d9b45d5a9a7ac7bcd93d78d2b059825452194efcc9e4acfd3f"
     },
-    "availability": "Archive is present in the beta85 Google Drive release folder, but connected raw download/materialization returns provider HTTP 403. Exact-source runtime PASS is therefore not claimed."
+    "availability": "Exact authoritative archive bytes were recovered from ChatGPT Library, size and SHA256 verified, extracted, and accepted by the Linux source guard. Google Drive raw download remains blocked but is no longer a source-verification blocker."
   },
-  "beta85LinuxAlignment": {
-    "implementationCommit": "249469275061581edd822870d0797ebf6c7a9617",
-    "ciLayerFixCommit": "54bce7b19682677d4ed1dfd7d2be522d0cda554d",
-    "acceptedHostedCommit": "a19155fa2002d8175f3db4ba046cdba903d172bf",
+  "onlineHubVisibilityFix": {
+    "status": "PASS",
+    "rootCause": "The Linux fluid tab bar was fixed to an eight-column grid with overflow hidden. Authoritative beta.85 HubAdapter dynamically adds Online & Cloud as the ninth primary tab, which wrapped into a clipped second row.",
+    "scope": "Linux presentation/delivery only. Shared HubAdapter, Cloud schema 7, unified SYNC, Web Results and tournament data logic are unchanged.",
+    "commits": {
+      "adapter": "50af24a898195df53c5f0948b057e900a5eede1f",
+      "entrypoint": "84673811c664463b187cbf44699a4e45f9e6d3f6",
+      "chromiumRegression": "aa9300461989d22a9722f292b11db728862a004b",
+      "adapterOrderGuard": "123dcf71a84756f1c66468244980e6dc6d8d7e96",
+      "acceptedHostedHead": "8f6586868c92536e4141765fce3099b2f0ed7350"
+    },
+    "behavior": "Primary navigation uses nine columns and explicitly keeps #tabHub visible; dynamic ninth tab remains on one row and is clickable.",
+    "realChromium": "LINUX_ONLINE_HUB_TAB_BROWSER=PASS"
+  },
+  "beta85LinuxAcceptance": {
+    "acceptedHostedCommit": "8f6586868c92536e4141765fce3099b2f0ed7350",
     "protectedCoreModified": false,
-    "architecture": "Linux platform/native adapters wrap the exact beta.85 shared-source contract. Linux-specific Cloud/Web-results/rating-list UI business forks are not active in the entrypoint.",
+    "architecture": "Linux platform/native adapters wrap exact beta.85 shared source. Linux-specific Hub fix changes presentation only and loads before the final shared-source delivery adapter.",
     "hostedGates": {
-      "platformAcceptance": {"runNumber": 42, "runId": 34406223149, "result": "SUCCESS"},
-      "crossPlatformParity": {"runNumber": 38, "runId": 34406223165, "result": "SUCCESS"},
-      "ratingLists": {"runNumber": 16, "runId": 34406223143, "result": "SUCCESS"},
-      "webResults": {"runNumber": 10, "runId": 34406223189, "result": "SUCCESS"}
+      "platformAcceptance": {"runNumber": 49, "runId": 34410974326, "result": "SUCCESS"},
+      "crossPlatformParity": {"runNumber": 48, "runId": 34410974401, "result": "SUCCESS"}
     },
     "platformAcceptanceCoverage": [
       "beta.85 alignment/source guards",
       "fail-closed source materialization",
       "adapter/load-order contracts",
+      "Online & Cloud dynamic ninth-tab real Chromium regression",
       "Python/JavaScript compile",
       "native integration contracts",
       "real Chromium runtime",
@@ -74,19 +91,33 @@
       "Ubuntu 26.04 container smoke",
       "TRF16/TRF26",
       "Gacrux 1.9.57",
-      "BBP",
-      "Tie-Break"
+      "BBP 6.0.0",
+      "Tie-Break 27/27 ranks, 0 mismatches"
     ],
     "platformOnlyArtifact": {
       "name": "chess-publisher-linux-beta85-platform-only-kit",
-      "id": 10125532864,
-      "digest": "sha256:ef9ee9136b79bf86f15f52265b20f987a4ab6e1734bb24314f4513b08103fe35"
+      "id": 10127279784,
+      "digest": "sha256:c423b779751cd4988b763cd2e529c4059b498948f3ff2f7c43d19aa06c1b3a5b"
     },
     "acceptanceReportArtifact": {
       "name": "linux-beta85-platform-acceptance-report",
-      "id": 10125531728,
-      "digest": "sha256:a691165aabfe9f41ce4cc89d60b74c6f8485bd2a8af8e4261962e5b8d0b145bb"
+      "id": 10127278461,
+      "digest": "sha256:3b8579c3ce317a9494ac5a4de7ca036751f0eb3a81a26355f88c95380a1af537"
     }
+  },
+  "exactSourcePackage": {
+    "status": "TEST CANDIDATE PASS - USER RUNTIME GATE PENDING",
+    "file": "Chess-Publisher-v1.06.00-beta.85-Ubuntu-amd64-ONLINE-HUB-FIX-EXACT-SOURCE-TEST-CANDIDATE.deb",
+    "bytes": 55860084,
+    "sha256": "6391da6f16603b6809fe9752d51f6dfa6b8e94b9dc8ba5f66b6783636aaa0b99",
+    "bundle": "Chess-Publisher-v1.06.00-beta.85-Ubuntu-amd64-ONLINE-HUB-FIX-EXACT-SOURCE-TEST-CANDIDATE.zip",
+    "bundleSha256": "a339004e980abf79f5cee8135411489e76f92dd24b8dcf58a2cb40c4bb0a1ce5",
+    "packageVersion": "1.06.00~beta85",
+    "sharedSourceVerified": true,
+    "packagePayloadVerified": true,
+    "localInstalledSelfTest": "6 PASS / 0 FAIL",
+    "supersedesSha256": "aeca57bafa97d6c1fc2b14985041a8d6a215ed50436693e932ab43148d148c74",
+    "supersedesReason": "Previous beta.85 exact-source candidate did not show Online & Cloud because the Linux tab grid had only eight visible columns."
   },
   "previousAcceptedParity": {
     "version": "v1.06.00-beta.81",
@@ -95,7 +126,7 @@
     "matrix": "20/20 PASS",
     "package": "Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb",
     "packageSha256": "be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc",
-    "role": "last fully proven exact-shared-source Windows/Linux parity anchor and rollback package"
+    "role": "last previous fully proven exact-shared-source Windows/Linux parity anchor and rollback package"
   },
   "linuxRollbackBaseline": {
     "legacyVersion": "v1.06.00-beta.34-linuxdev23",
@@ -103,17 +134,17 @@
     "role": "legacy rollback only; never a forward source lineage"
   },
   "parity": {
-    "conclusion": "BETA85 HOSTED PLATFORM ALIGNMENT PASS; EXACT SHARED-SOURCE BYTE PARITY NOT YET PROVEN",
-    "sharedSource": "fail-closed to exact beta.85 manifest/archive identity",
-    "protectedCore": "no protected pairing/TRF/Gacrux/BBP/Tie-Break/Chess-Results code changed by Linux alignment",
+    "conclusion": "BETA85 EXACT SHARED SOURCE VERIFIED; ONLINE HUB VISIBILITY FIX HOSTED PASS; EXACT PACKAGE BUILT AND SELF-TESTED; REAL USER UBUNTU CONFIRMATION PENDING",
+    "sharedSource": "exact beta.85 archive and runtime manifest identity verified",
+    "protectedCore": "no protected pairing/TRF/Gacrux/BBP/Tie-Break/Chess-Results code changed",
     "externalTecDependency": "Q18"
   },
   "parityAudit": {
-    "conclusion": "HOSTED PLATFORM ALIGNMENT PASS; EXACT SHARED-SOURCE BYTE PARITY/PACKAGE PENDING",
+    "conclusion": "EXACT-SOURCE TEST CANDIDATE PASS; NOT FINAL/STABLE UNTIL REAL USER UBUNTU INSTALL/START CONFIRMATION",
     "previousProvenAnchor": "v1.06.00-beta.81"
   },
   "protectedCoreRule": "Any unexpected protected/shared hash change requires STOP and investigation. Never fork business/tournament logic for Linux.",
   "versionRule": "Windows and Linux share the beta version. beta.85 is the current target; independent linuxdev numbering is forbidden.",
   "gitRule": "Every logical block: re-read HEAD, test/regress, commit/push fast-forward only, verify remote main SHA.",
-  "next": "Obtain readable bytes of the exact beta.85 authoritative source archive, verify SHA256 2795a061..., materialize the exact shared source, run exact-source/package acceptance, build beta.85 .deb, then require real Ubuntu user install/start confirmation before release-candidate promotion."
+  "next": "Install/reinstall the Online Hub fix exact-source beta.85 .deb on a real Ubuntu machine. Confirm application startup, visible/clickable Online & Cloud tab, existing tournament load, Pairings, Standings and Chess-Results. Only after that user runtime gate may beta.85 be considered for release-candidate promotion."
 }
