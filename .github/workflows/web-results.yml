@@ -9,6 +9,7 @@ on:
       - 'linux/chess_publisher_linux_entry.py'
       - 'tests/test_web_results_download.py'
       - 'tests/web_results_reconcile_contract.mjs'
+      - 'tests/web_results_pending_flow_contract.mjs'
       - '.github/workflows/web-results.yml'
   workflow_dispatch:
 
@@ -23,8 +24,13 @@ jobs:
       - name: Python syntax
         run: python -m py_compile linux/web_results_download_integration.py tests/test_web_results_download.py
       - name: JavaScript syntax
-        run: node --check linux/web_results_download.js
+        run: |
+          node --check linux/web_results_download.js
+          node --check tests/web_results_reconcile_contract.mjs
+          node --check tests/web_results_pending_flow_contract.mjs
       - name: Result-only static safety contract
         run: python tests/test_web_results_download.py
       - name: Deterministic reconcile contract
         run: node tests/web_results_reconcile_contract.mjs
+      - name: Pending Web queue download and acknowledgement contract
+        run: node tests/web_results_pending_flow_contract.mjs
