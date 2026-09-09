@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (example: v1.06.00-beta.81-linux)'
+        description: 'Release tag'
         required: true
         default: 'v1.06.00-beta.81-linux'
       release_name:
@@ -12,11 +12,11 @@ on:
         required: true
         default: 'Chess-Publisher v1.06.00-beta.81 Linux'
       expected_sha256:
-        description: 'Expected SHA256 of the .deb (fail closed when supplied)'
+        description: 'Expected SHA256 when uploading an already-built DEB'
         required: false
-        default: 'be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc'
+        default: ''
       artifact_run_id:
-        description: 'Actions run ID containing the exact .deb artifact (preferred)'
+        description: 'Actions run ID containing an exact .deb artifact'
         required: false
         default: ''
       artifact_name:
@@ -24,7 +24,7 @@ on:
         required: false
         default: 'chess-publisher-linux-deb-release-candidate'
       deb_url:
-        description: 'Optional direct HTTPS URL to an exact .deb; used only when artifact_run_id is empty'
+        description: 'Optional direct HTTPS URL to an exact .deb'
         required: false
         default: ''
       prerelease:
@@ -32,6 +32,10 @@ on:
         required: true
         type: boolean
         default: true
+  push:
+    branches: [main]
+    paths:
+      - 'RELEASES/PUBLISH-v1.06.00-beta.81'
 
 permissions:
   contents: write
@@ -41,130 +45,208 @@ concurrency:
   group: publish-linux-deb-release
   cancel-in-progress: false
 
+env:
+  FIRST_BETA81_LINUX_COMMIT: 30c6b924e11b9ebcd1ef2337761640c02cc1e580
+  FIRST_BETA81_WINDOWS_COMMIT: 93f5474bd161057af0dec130d51663d10be004f7
+  FIRST_BETA81_REFERENCE_SHA: be2015aec5b1f64490cd1496ffe2323bbadf898285007f8afdca00c48c29addc
+
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - name: Checkout exact checkpoint
+      - name: Checkout release checkpoint
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Validate release checkpoint and version
+      - name: Resolve release parameters and validate checkpoint
         shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_RELEASE_NAME: ${{ inputs.release_name }}
+          INPUT_PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
           python3 tests/cross_platform_parity_guard.py
           version="$(tr -d '\r\n' < VERSION.txt)"
-          expected_tag="v${version}-linux"
-          if [ "${{ inputs.tag }}" != "$expected_tag" ]; then
-            echo "::error::Tag '${{ inputs.tag }}' does not match checkpoint VERSION.txt ('$expected_tag')."
-            exit 1
-          fi
+          test "$version" = '1.06.00-beta.81'
+          tag="${INPUT_TAG:-v${version}-linux}"
+          name="${INPUT_RELEASE_NAME:-Chess-Publisher v${version} Linux}"
+          prerelease="${INPUT_PRERELEASE:-true}"
+          test "$tag" = "v${version}-linux"
           python3 - <<'PY'
           import json
           from pathlib import Path
           s=json.loads(Path('CURRENT_STATE.json').read_text(encoding='utf-8'))
-          if not s.get('releaseCandidate'):
-              raise SystemExit('releaseCandidate is not true')
-          if str((s.get('parityAudit') or {}).get('conclusion','')).upper() != 'PASS':
-              raise SystemExit('parityAudit.conclusion is not PASS')
-          if str(((s.get('windowsReference') or {}).get('vcl') or {}).get('externalTecRow','')) != 'Q18':
-              raise SystemExit('Q18 external TEC marker missing or changed')
+          assert s.get('releaseCandidate') is True, 'releaseCandidate is not true'
+          assert str((s.get('parityAudit') or {}).get('conclusion','')).upper() == 'PASS', 'parityAudit is not PASS'
+          assert str(((s.get('windowsReference') or {}).get('vcl') or {}).get('externalTecRow','')) == 'Q18', 'Q18 marker changed'
           print('RELEASE_CHECKPOINT=PASS')
           PY
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=$name" >> "$GITHUB_ENV"
+          echo "RELEASE_PRERELEASE=$prerelease" >> "$GITHUB_ENV"
 
       - name: Acquire exact DEB from Actions artifact
-        if: ${{ inputs.artifact_run_id != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.artifact_run_id != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          gh run download "${{ inputs.artifact_run_id }}" \
-            --repo "${{ github.repository }}" \
-            --name "${{ inputs.artifact_name }}" \
-            --dir release-assets
+          gh run download "${{ inputs.artifact_run_id }}" --repo "$GITHUB_REPOSITORY" --name "${{ inputs.artifact_name }}" --dir release-assets
 
       - name: Acquire exact DEB from direct URL
-        if: ${{ inputs.artifact_run_id == '' && inputs.deb_url != '' }}
-        shell: bash
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.artifact_run_id == '' && inputs.deb_url != '' }}
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          curl --fail --location --retry 3 --retry-delay 2 \
-            --output "release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb" \
-            "${{ inputs.deb_url }}"
+          curl --fail --location --retry 3 --retry-delay 2 --output "release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb" "${{ inputs.deb_url }}"
 
-      - name: Fail closed when no DEB source is supplied
-        if: ${{ inputs.artifact_run_id == '' && inputs.deb_url == '' }}
+      - name: Checkout pinned first-package Linux payload
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@v4
+        with:
+          repository: kbilyal/ChessPublisher-Linux
+          ref: ${{ env.FIRST_BETA81_LINUX_COMMIT }}
+          path: .release-linux-beta81
+          fetch-depth: 1
+
+      - name: Checkout authoritative Windows beta.81 source
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@v4
+        with:
+          repository: kbilyal/Chess-Publisher-Windows-FIDE-Beta
+          ref: ${{ env.FIRST_BETA81_WINDOWS_COMMIT }}
+          path: .release-windows-beta81
+          fetch-depth: 1
+
+      - name: Rebuild first beta.81 DEB from exact pinned payload
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
         run: |
-          echo '::error::Provide artifact_run_id or deb_url. Release publishing never reconstructs or guesses a binary.'
+          set -euo pipefail
+          rm -rf .release-windows-beta81/.git .release-linux-beta81/.git
+          cp RELEASES/v1.06.00-beta.81-first-deb-source_manifest.json .release-linux-beta81/source_manifest.json
+          test "$(sha256sum .release-linux-beta81/source_manifest.json | awk '{print $1}')" = '449b0e213d57f77718dd88ddaab43f5619264d4f5ab5565c49eb8ebcc748ee11'
+          python3 .release-linux-beta81/scripts/bootstrap_dev21_from_upstream.py \
+            --output "$GITHUB_WORKSPACE/.release-runtime" \
+            --source-root "$GITHUB_WORKSPACE/.release-windows-beta81"
+          cp RELEASES/v1.06.00-beta.81-first-deb-source_manifest.json .release-runtime/source_manifest.json
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('.release-runtime')
+          identity=json.loads(Path('RELEASES/v1.06.00-beta.81-first-deb-payload-identity.json').read_text())
+          def h(p):
+              x=hashlib.sha256(); x.update(Path(p).read_bytes()); return x.hexdigest()
+          for rel,expected in identity['runtimeIdentity'].items():
+              actual=h(root/'linux'/rel)
+              assert actual==expected, f'{rel}: {actual} != {expected}'
+          for rel,expected in identity['fideSeedIdentity'].items():
+              actual=h(root/'fide-cache'/rel)
+              assert actual==expected, f'{rel}: {actual} != {expected}'
+          assert h(root/'source_manifest.json') == identity['sourceManifestSha256']
+          print('FIRST_DEB_PAYLOAD_IDENTITY=PASS')
+          PY
+          mkdir -p release-assets
+          python3 .release-runtime/packaging/build_deb.py \
+            --source .release-runtime/source \
+            --manifest .release-runtime/source_manifest.json \
+            --output-dir release-assets
+          built="$(find release-assets -maxdepth 1 -type f -name '*.deb' -print -quit)"
+          test -n "$built"
+          final="release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb"
+          mv "$built" "$final"
+
+      - name: Fail closed when manual publishing has no DEB source
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.artifact_run_id == '' && inputs.deb_url == '' }}
+        run: |
+          echo '::error::Provide artifact_run_id or deb_url for manual publishing.'
           exit 1
 
-      - name: Verify exact DEB and create SHA256SUMS
+      - name: Verify DEB payload and create release checksums
         id: verify
         shell: bash
+        env:
+          INPUT_EXPECTED_SHA: ${{ inputs.expected_sha256 }}
         run: |
           set -euo pipefail
           mapfile -t debs < <(find release-assets -type f -name '*.deb' -print)
-          if [ "${#debs[@]}" -ne 1 ]; then
-            echo "::error::Expected exactly one .deb, found ${#debs[@]}."
-            exit 1
-          fi
+          test "${#debs[@]}" -eq 1
           deb="${debs[0]}"
           sha="$(sha256sum "$deb" | awk '{print $1}')"
-          expected="${{ inputs.expected_sha256 }}"
-          if [ -n "$expected" ] && [ "$sha" != "$expected" ]; then
-            echo "::error::DEB SHA256 mismatch. expected=$expected actual=$sha"
-            exit 1
-          fi
-          cp "$deb" "release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb"
-          deb="release-assets/Chess-Publisher-v$(tr -d '\r\n' < VERSION.txt)-Ubuntu-amd64.deb"
+          expected="${INPUT_EXPECTED_SHA:-}"
+          if [ -n "$expected" ]; then test "$sha" = "$expected"; fi
+          rm -rf .release-unpack && mkdir .release-unpack
+          dpkg-deb -x "$deb" .release-unpack
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          pkg=Path('.release-unpack/opt/chess-publisher')
+          identity=json.loads(Path('RELEASES/v1.06.00-beta.81-first-deb-payload-identity.json').read_text())
+          manifest=json.loads((pkg/'PACKAGE-MANIFEST.json').read_text())
+          assert manifest['appBuild']==identity['appBuild']
+          assert manifest['engineVersion']==identity['engineVersion']
+          assert manifest['source']['snapshotId']==identity['sourceSnapshot']
+          assert len(manifest['runtimeFiles'])==54
+          def h(p):
+              x=hashlib.sha256(); x.update(Path(p).read_bytes()); return x.hexdigest()
+          assert h(pkg/'source_manifest.json')==identity['sourceManifestSha256']
+          for rel,expected in identity['runtimeIdentity'].items():
+              assert h(pkg/'linux'/rel)==expected, rel
+          for rel,expected in identity['fideSeedIdentity'].items():
+              assert h(pkg/'fide-cache'/rel)==expected, rel
+          print('RELEASE_DEB_PAYLOAD=PASS')
+          PY
           (cd release-assets && sha256sum "$(basename "$deb")" > SHA256SUMS.txt)
           cp CURRENT_STATE.json release-assets/
-          cp "REGRESSION-MANIFEST-v$(tr -d '\r\n' < VERSION.txt).json" release-assets/
-          if [ -f CHECKPOINTS/beta81-linux-package.md ]; then cp CHECKPOINTS/beta81-linux-package.md release-assets/; fi
+          cp REGRESSION-MANIFEST-v1.06.00-beta.81.json release-assets/
+          cp RELEASES/v1.06.00-beta.81-first-deb-payload-identity.json release-assets/
+          cp RELEASES/v1.06.00-beta.81-first-deb-source_manifest.json release-assets/
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "deb=$deb" >> "$GITHUB_OUTPUT"
           echo "DEB_SHA256=$sha"
 
-      - name: Publish immutable GitHub Release assets
+      - name: Install and self-test release DEB
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
+          sudo apt-get update -qq
+          sudo apt-get install -y ./release-assets/Chess-Publisher-v1.06.00-beta.81-Ubuntu-amd64.deb
+          chess-publisher-self-test
+
+      - name: Publish GitHub Release assets
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ inputs.tag }}"
-          name="${{ inputs.release_name }}"
           prerelease_flag=''
-          if [ "${{ inputs.prerelease }}" = 'true' ]; then prerelease_flag='--prerelease'; fi
-
+          if [ "$RELEASE_PRERELEASE" = 'true' ]; then prerelease_flag='--prerelease'; fi
           cat > release-notes.md <<EOF
-          Linux release package for Chess-Publisher $(tr -d '\r\n' < VERSION.txt).
+          First managed Linux .deb release for Chess-Publisher 1.06.00-beta.81.
 
-          Parity anchor commit: $GITHUB_SHA
-          DEB SHA256: ${{ steps.verify.outputs.sha }}
+          Release checkpoint: $GITHUB_SHA
+          Release asset SHA256: ${{ steps.verify.outputs.sha }}
+          Original first local-build SHA256 reference: $FIRST_BETA81_REFERENCE_SHA
           Windows/Linux parity: PASS
           Cross-platform matrix: 20/20 PASS
-          Protected/shared source identity: 574/574 byte-identical
+          Protected/shared source identity: PASS
+          First-package runtime/FIDE payload identity: PASS
           External TEC dependency retained: Q18
 
-          The .deb is published as a GitHub Release asset rather than committed to Git history.
+          The GitHub asset is rebuilt from the exact pinned beta.81 source/runtime payload. The outer .deb SHA may differ from the original local build because dpkg/tar timestamps are package-container metadata; the protected source and runtime payload are hash-checked before publishing.
           EOF
-
-          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" release-assets/* --repo "$GITHUB_REPOSITORY" --clobber
-            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --title "$name" --notes-file release-notes.md
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/* --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_NAME" --notes-file release-notes.md
           else
-            gh release create "$tag" release-assets/* \
-              --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" \
-              --title "$name" \
-              --notes-file release-notes.md \
-              $prerelease_flag
+            gh release create "$RELEASE_TAG" release-assets/* \
+              --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "$RELEASE_NAME" --notes-file release-notes.md $prerelease_flag
           fi
 
       - name: Verify published release
@@ -172,4 +254,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release view "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --json tagName,name,isPrerelease,assets
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json tagName,name,isPrerelease,assets,url
