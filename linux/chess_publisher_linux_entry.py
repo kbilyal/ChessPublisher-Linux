@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chess-Publisher Linux development entrypoint with platform integrations."""
+"""Chess-Publisher Linux beta.81 entrypoint with platform-only integrations."""
 from __future__ import annotations
 from pathlib import Path
 import chess_publisher_linux as app
@@ -14,7 +14,6 @@ from fide_cache_integration import apply as apply_fide_cache
 from rating_lists_integration import apply as apply_rating_lists
 from fide_readiness_integration import apply as apply_fide_readiness
 from fide_integration import apply as apply_fide
-from rating_lists_ui_integration import apply as apply_rating_lists_ui
 from chess_results_integration import apply as apply_chess_results
 from dgt_integration import apply as apply_dgt
 from telegram_integration import apply as apply_telegram
@@ -23,38 +22,16 @@ from export_runtime_integration import apply as apply_export_runtime
 from browser_integration import apply as apply_browser
 from window_integration import apply as apply_window
 from pairings_result_desk_integration import apply as apply_pairings_result_desk
-from cloud_directional_sync_integration import apply as apply_cloud_directional_sync
-from web_results_download_integration import apply as apply_web_results_download
-from cloud_unified_sync_integration import apply as apply_cloud_unified_sync
+from beta81_shared_source_integration import apply as apply_beta81_shared_source
 
-apply_build_identity()
-apply_hub_proxy()
-apply_fide_payload_policy()
-apply_fide_streaming()
-apply_fide_download()
-apply_fide_cache()
-apply_rating_lists()
-apply_fide_readiness()
-apply_fide()
-apply_rating_lists_ui()
-apply_chess_results()
-apply_dgt()
-apply_telegram()
-apply_desktop()
-apply_export_runtime()
-apply_browser()
-apply_window()
-apply_pairings_result_desk()
-apply_cloud_directional_sync()
-apply_web_results_download()
-apply_cloud_unified_sync()
+# Platform/native adapters only. Shared rating-list semantics, Cloud identity,
+# Web-results reconciliation and unified SYNC come from exact beta.81 source.
+apply_build_identity();apply_hub_proxy();apply_fide_payload_policy();apply_fide_streaming();apply_fide_download();apply_fide_cache();apply_rating_lists();apply_fide_readiness();apply_fide();apply_chess_results();apply_dgt();apply_telegram();apply_desktop();apply_export_runtime();apply_browser();apply_window();apply_pairings_result_desk();apply_beta81_shared_source()
 
 if __name__=='__main__':
     package_root=Path(__file__).resolve().parent.parent
-    try:
-        verified=require_package_source(package_root)
+    try:verified=require_package_source(package_root)
     except SourceIdentityError as exc:
-        print(f'Chess-Publisher Linux refused to start: {exc}',file=__import__('sys').stderr)
-        raise SystemExit(3)
-    print(f"Verified source snapshot: {verified.get('snapshotId')} · {APP_BUILD} · LocalEngine {ENGINE_VERSION}")
+        print(f'Chess-Publisher Linux refused to start: {exc}',file=__import__('sys').stderr);raise SystemExit(3)
+    print(f"Verified shared source: {verified.get('snapshotId')} · {APP_BUILD} · LocalEngine {ENGINE_VERSION}")
     raise SystemExit(app.main())
