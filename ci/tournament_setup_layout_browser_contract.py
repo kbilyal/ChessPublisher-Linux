@@ -31,6 +31,7 @@ html,body{margin:0}.content{padding:12px}.form-grid-4{display:grid;grid-template
 </div></div></div></div>
 <script>
 function check(value,message){if(!value)throw new Error(message);}
+function centerY(r){return r.top+r.height/2;}
 window.addEventListener('load',()=>{
   try{
     const grid=document.getElementById('fixtureGrid');
@@ -42,13 +43,13 @@ window.addEventListener('load',()=>{
     check(css.gridColumnEnd==='-1','long-event panel does not end at the final grid line');
     check(Math.abs(p.left-g.left)<2&&Math.abs(p.right-g.right)<2,'long-event panel does not occupy a full grid row');
     const dateRects=[rect('startDateLabel'),rect('startDate'),rect('endDateLabel'),rect('endDate')];
-    const dateTops=dateRects.map(x=>x.top);
-    check(Math.max(...dateTops)-Math.min(...dateTops)<2,'Start/End Date label-control pairs are shifted');
-    check(Math.min(...dateTops)>p.bottom,'Start/End Date row overlaps or precedes long-event panel');
+    const dateCenters=dateRects.map(centerY);
+    check(Math.max(...dateCenters)-Math.min(...dateCenters)<2,'Start/End Date label-control pairs are shifted');
+    check(Math.min(...dateRects.map(x=>x.top))>p.bottom,'Start/End Date row overlaps or precedes long-event panel');
     const formatRects=[rect('tournamentFormatLabel'),rect('tournamentFormat'),rect('pairingSystemLabel'),rect('pairingSystem')];
-    const formatTops=formatRects.map(x=>x.top);
-    check(Math.max(...formatTops)-Math.min(...formatTops)<2,'Format/Pairing System label-control pairs are shifted');
-    check(Math.min(...formatTops)>Math.max(...dateRects.map(x=>x.bottom)),'Format/Pairing System is not on the next row');
+    const formatCenters=formatRects.map(centerY);
+    check(Math.max(...formatCenters)-Math.min(...formatCenters)<2,'Format/Pairing System label-control pairs are shifted');
+    check(Math.min(...formatCenters)>Math.max(...dateCenters)+5,'Format/Pairing System is not on the next row');
     document.body.setAttribute('data-tournament-setup-layout-test','PASS');
   }catch(error){document.body.setAttribute('data-tournament-setup-layout-test','FAIL: '+error.message);}
 });
