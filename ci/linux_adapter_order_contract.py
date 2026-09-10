@@ -3,8 +3,8 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 entry=(ROOT/'linux'/'chess_publisher_linux_entry.py').read_text(encoding='utf-8')
-hubfix=entry.find('apply_hub_tab_visibility()');shared=entry.find('apply_shared_source()');runtime=entry.find('apply_runtime_instance()');platform=entry.find('apply_pairings_result_desk()')
-if min(hubfix,shared,runtime,platform)<0 or not platform<hubfix<shared<runtime:raise RuntimeError('Linux platform order must be Result Desk -> Hub visibility -> shared source -> runtime instance selection')
+hubfix=entry.find('apply_hub_tab_visibility()');layout=entry.find('apply_tournament_setup_layout()');shared=entry.find('apply_shared_source()');runtime=entry.find('apply_runtime_instance()');platform=entry.find('apply_pairings_result_desk()')
+if min(hubfix,layout,shared,runtime,platform)<0 or not platform<hubfix<layout<shared<runtime:raise RuntimeError('Linux platform order must be Result Desk -> Hub visibility -> Tournament Setup layout -> shared source -> runtime instance selection')
 for forbidden in ('apply_cloud_directional_sync()','apply_web_results_download()','apply_cloud_unified_sync()','apply_rating_lists_ui()'):
     if forbidden in entry:raise RuntimeError(f'Linux-specific shared/business policy remains active: {forbidden}')
 adapter=(ROOT/'linux'/'shared_source_integration.py').read_text(encoding='utf-8')
@@ -15,6 +15,11 @@ if 'data-chesspublisher-linux-delivery' not in adapter or 'DELIVERY_REVISION' no
 hub=(ROOT/'linux'/'hub_tab_visibility_integration.py').read_text(encoding='utf-8')
 for marker in ('grid-template-columns:repeat(9,minmax(0,1fr))!important','#appWindow #tabHub','visibility:visible!important','opacity:1!important'):
     if marker not in hub:raise RuntimeError(f'Online Hub visibility marker missing: {marker}')
+layout_adapter=(ROOT/'linux'/'tournament_setup_layout_integration.py').read_text(encoding='utf-8')
+for marker in ('cpLinuxTournamentSetupLayoutStyle','#cpBeta70LongEventBox','grid-column:1 / -1!important','justify-self:stretch!important'):
+    if marker not in layout_adapter:raise RuntimeError(f'Tournament Setup layout marker missing: {marker}')
+build=(ROOT/'linux'/'build_info.py').read_text(encoding='utf-8')
+if 'DELIVERY_REVISION = "beta85-tournament-layout-runtime3"' not in build:raise RuntimeError('Tournament Setup point-fix delivery revision is missing')
 
 sys.path.insert(0,str(ROOT/'linux'))
 import runtime_instance_integration as instance
@@ -49,5 +54,6 @@ finally:
 if not instance._explicit_port(['--port','19999']) or not instance._explicit_port(['--port=19999']) or instance._explicit_port(['--quiet']):raise RuntimeError('Explicit --port detection regression')
 print('BETA85_LINUX_ADAPTER_LOAD_ORDER=PASS')
 print('BETA85_LINUX_ONLINE_HUB_TAB_LAYOUT_GUARD=PASS')
+print('BETA85_TOURNAMENT_SETUP_LAYOUT_GUARD=PASS')
 print('BETA85_STALE_RUNTIME_INSTANCE_SELECTION=PASS')
 print('BETA85_RUNTIME_INSTANCE_FAIL_CLOSED=PASS')

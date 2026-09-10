@@ -47,6 +47,7 @@ jobs:
           test -f "$CP_RUNTIME/MATERIALIZED_STATE.json"
           test -f "$CP_RUNTIME/linux/shared_source_integration.py"
           test -f "$CP_RUNTIME/linux/hub_tab_visibility_integration.py"
+          test -f "$CP_RUNTIME/linux/tournament_setup_layout_integration.py"
           test -f "$CP_RUNTIME/linux/rating_lists/store.py"
           python - <<'PY'
           import json, os
@@ -66,7 +67,9 @@ jobs:
       - name: Verify beta.85 Linux adapter identity
         run: |
           grep -F 'APP_BUILD = "1.06.00-beta.85"' "$CP_RUNTIME/linux/build_info.py"
+          grep -F 'DELIVERY_REVISION = "beta85-tournament-layout-runtime3"' "$CP_RUNTIME/linux/build_info.py"
           grep -F 'apply_hub_tab_visibility()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
+          grep -F 'apply_tournament_setup_layout()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F 'apply_shared_source()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_cloud_directional_sync()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           ! grep -F 'apply_web_results_download()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
@@ -74,6 +77,7 @@ jobs:
           ! grep -F 'apply_rating_lists_ui()' "$CP_RUNTIME/linux/chess_publisher_linux_entry.py"
           grep -F '/source/webview/CloudWorkspaceRedesign.js' "$CP_RUNTIME/linux/shared_source_integration.py"
           grep -F 'grid-template-columns:repeat(9,minmax(0,1fr))!important' "$CP_RUNTIME/linux/hub_tab_visibility_integration.py"
+          grep -F 'grid-column:1 / -1!important' "$CP_RUNTIME/linux/tournament_setup_layout_integration.py"
       - name: Compile platform runtime and adapters
         working-directory: ${{ env.CP_RUNTIME }}
         run: |
@@ -110,6 +114,7 @@ jobs:
         run: |
           python ci/window_browser_contract.py
           python ci/hub_tab_browser_contract.py
+          python ci/tournament_setup_layout_browser_contract.py
           python ci/chromium_runtime_smoke.py
           set +e
           python ci/chromium_runtime_smoke.py --exact-drive-ui
